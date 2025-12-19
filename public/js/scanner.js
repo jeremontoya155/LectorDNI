@@ -134,11 +134,31 @@ function mostrarResultado(data) {
     // Actualizar contador
     contadorTotal.textContent = contador;
 
-    // Llenar datos
+    // Llenar datos personales
     document.getElementById('nombreCompleto').textContent = datos.nombreCompleto;
     document.getElementById('dniNumero').textContent = datos.dni;
+    document.getElementById('cuil').textContent = datos.cuil || 'No disponible';
+    document.getElementById('sexo').textContent = datos.sexo === 'M' ? 'Masculino' : datos.sexo === 'F' ? 'Femenino' : datos.sexo;
     document.getElementById('fechaNacimiento').textContent = datos.fechaNacimiento;
     document.getElementById('edadPersona').textContent = `${datos.edad} años`;
+    document.getElementById('nacionalidad').textContent = datos.nacionalidad || 'No disponible';
+    document.getElementById('lugarNacimiento').textContent = datos.lugarNacimiento || 'No disponible';
+    
+    // País de nacimiento (solo mostrar si existe y es diferente)
+    const paisRow = document.getElementById('paisRow');
+    const paisNacimiento = document.getElementById('paisNacimiento');
+    if (datos.paisNacimiento && datos.paisNacimiento.trim() !== '') {
+        paisNacimiento.textContent = datos.paisNacimiento;
+        paisRow.style.display = 'flex';
+    } else {
+        paisRow.style.display = 'none';
+    }
+
+    // Llenar datos del documento
+    document.getElementById('tramite').textContent = datos.tramite;
+    document.getElementById('ejemplar').textContent = datos.ejemplar;
+    document.getElementById('fechaEmision').textContent = datos.fechaEmision;
+    document.getElementById('fechaVencimiento').textContent = datos.fechaVencimiento;
 
     // Badge de estado
     const statusBadge = document.getElementById('statusBadge');

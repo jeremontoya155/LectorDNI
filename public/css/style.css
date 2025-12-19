@@ -266,10 +266,33 @@ main {
     width: 100%;
 }
 
+.datos-sections {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    width: 100%;
+}
+
+.datos-section {
+    background: rgba(255, 255, 255, 0.5);
+    padding: 20px;
+    border-radius: 12px;
+    border: 2px solid rgba(102, 126, 234, 0.2);
+}
+
+.section-title {
+    color: #667eea;
+    font-size: 1.2em;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #667eea;
+    font-weight: bold;
+}
+
 .person-info {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     width: 100%;
 }
 
@@ -422,18 +445,30 @@ main {
         font-size: 1.3em;
     }
 
+    .datos-sections {
+        grid-template-columns: 1fr;
+    }
+
+    .datos-section {
+        padding: 15px;
+    }
+
+    .section-title {
+        font-size: 1.1em;
+    }
+
     .info-row {
         flex-direction: column;
         align-items: flex-start;
-        padding: 12px 15px;
+        padding: 10px 12px;
     }
 
     .info-label {
-        font-size: 0.9em;
+        font-size: 0.85em;
     }
 
     .info-value {
-        font-size: 1em;
+        font-size: 0.95em;
         text-align: left;
         width: 100%;
     }

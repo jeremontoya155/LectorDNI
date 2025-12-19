@@ -20,7 +20,7 @@ let historialEscaneos = [];
 function decodificarDNI(codigoBarras) {
     try {
         // El código de barras PDF417 del DNI argentino tiene el formato:
-        // @APELLIDO@NOMBRE@SEXO@DNI@EJEMPLAR@FECHA_NAC@FECHA_EMISION@...
+        // @TRAMITE@APELLIDO@NOMBRE@SEXO@DNI@EJEMPLAR@FECHA_NAC@FECHA_EMISION@FECHA_VENC@CUIL@...
         const datos = codigoBarras.split('@');
         
         return {
@@ -32,7 +32,15 @@ function decodificarDNI(codigoBarras) {
             ejemplar: datos[5] || '',
             fechaNacimiento: datos[6] || '',
             fechaEmision: datos[7] || '',
-            fechaVencimiento: datos[8] || ''
+            fechaVencimiento: datos[8] || '',
+            cuil: datos[9] || '',
+            nacionalidad: datos[10] || '',
+            lugarNacimiento: datos[11] || '',
+            paisNacimiento: datos[12] || '',
+            idTramite: datos[13] || '',
+            imagenFirma: datos[14] || '',
+            codigoVerificacion: datos[15] || '',
+            datoCompleto: codigoBarras // Guardamos el código completo también
         };
     } catch (error) {
         console.error('Error al decodificar DNI:', error);
@@ -117,17 +125,24 @@ app.post('/procesar-dni', (req, res) => {
     historialEscaneos.push(registro);
     
     // LOG DETALLADO EN CONSOLA
-    console.log('\n📋 DATOS EXTRAÍDOS:');
-    console.log('-----------------------------------');
+    console.log('\n📋 DATOS EXTRAÍDOS DEL DNI:');
+    console.log('=====================================');
+    console.log('🔷 DATOS PERSONALES:');
     console.log(`👤 Nombre completo: ${datosPersona.nombre} ${datosPersona.apellido}`);
     console.log(`🆔 DNI: ${datosPersona.dni}`);
     console.log(`🎂 Fecha de Nacimiento: ${datosPersona.fechaNacimiento}`);
     console.log(`📅 Edad: ${edad} años`);
-    console.log(`⚧️  Sexo: ${datosPersona.sexo}`);
-    console.log(`📄 Trámite: ${datosPersona.tramite}`);
+    console.log(`⚧️  Sexo: ${datosPersona.sexo === 'M' ? 'Masculino' : datosPersona.sexo === 'F' ? 'Femenino' : datosPersona.sexo}`);
+    console.log(`� CUIL: ${datosPersona.cuil || 'No disponible'}`);
+    console.log(`🌍 Nacionalidad: ${datosPersona.nacionalidad || 'No disponible'}`);
+    console.log(`📍 Lugar de Nacimiento: ${datosPersona.lugarNacimiento || 'No disponible'}`);
+    console.log(`🗺️  País de Nacimiento: ${datosPersona.paisNacimiento || 'No disponible'}`);
+    console.log('\n🔷 DATOS DEL DOCUMENTO:');
+    console.log(`�📄 Número de Trámite: ${datosPersona.tramite}`);
     console.log(`📌 Ejemplar: ${datosPersona.ejemplar}`);
     console.log(`📤 Fecha Emisión: ${datosPersona.fechaEmision}`);
     console.log(`📆 Vencimiento: ${datosPersona.fechaVencimiento}`);
+    console.log(`🔢 ID Trámite: ${datosPersona.idTramite || 'No disponible'}`);
     
     if (esMayorDeEdad) {
         console.log('\n✅ ESTADO: MAYOR DE EDAD (18+)');
@@ -145,11 +160,24 @@ app.post('/procesar-dni', (req, res) => {
     res.json({
         success: true,
         datos: {
+            // Datos personales
             nombreCompleto: `${datosPersona.nombre} ${datosPersona.apellido}`,
+            nombre: datosPersona.nombre,
+            apellido: datosPersona.apellido,
             dni: datosPersona.dni,
             edad,
             fechaNacimiento: datosPersona.fechaNacimiento,
             sexo: datosPersona.sexo,
+            cuil: datosPersona.cuil,
+            nacionalidad: datosPersona.nacionalidad,
+            lugarNacimiento: datosPersona.lugarNacimiento,
+            paisNacimiento: datosPersona.paisNacimiento,
+            // Datos del documento
+            tramite: datosPersona.tramite,
+            ejemplar: datosPersona.ejemplar,
+            fechaEmision: datosPersona.fechaEmision,
+            fechaVencimiento: datosPersona.fechaVencimiento,
+            idTramite: datosPersona.idTramite,
             esMayorDeEdad
         },
         contador: contadorEscaneos
