@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lector DNI Argentino</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🇦🇷 Lector de DNI Argentino</h1>
+            <div class="contador">
+                <span class="contador-label">Escaneos totales:</span>
+                <span class="contador-numero" id="contadorTotal"><%= contador %></span>
+            </div>
+        </header>
+
+        <main>
+            <!-- Sección de escaneo -->
+            <div class="scan-section" id="scanSection">
+                <div class="camera-container" id="cameraContainer">
+                    <video id="video" autoplay playsinline></video>
+                    <div class="scan-overlay">
+                        <div class="scan-frame">
+                            <div class="corner corner-tl"></div>
+                            <div class="corner corner-tr"></div>
+                            <div class="corner corner-bl"></div>
+                            <div class="corner corner-br"></div>
+                            <div class="scan-line"></div>
+                        </div>
+                    </div>
+                    <canvas id="canvas" style="display: none;"></canvas>
+                </div>
+
+                <div class="controls">
+                    <button id="startBtn" class="btn btn-primary">
+                        <span class="btn-icon">📷</span>
+                        Iniciar Escáner
+                    </button>
+                    <button id="stopBtn" class="btn btn-danger" style="display: none;">
+                        <span class="btn-icon">⏹️</span>
+                        Detener Cámara
+                    </button>
+                </div>
+
+                <div class="instructions">
+                    <p>📌 Posiciona el código de barras del DNI dentro del marco</p>
+                    <p>🔍 El escaneo es automático - mantén el DNI estable</p>
+                </div>
+            </div>
+
+            <!-- Sección de resultados -->
+            <div class="result-section" id="resultSection" style="display: none;">
+                <div class="result-card" id="resultCard">
+                    <div class="result-header">
+                        <h2>✅ Escaneo Exitoso</h2>
+                        <button id="newScanBtn" class="btn btn-secondary">Nuevo Escaneo</button>
+                    </div>
+                    
+                    <div class="result-content">
+                        <div class="person-info">
+                            <div class="info-row">
+                                <span class="info-label">👤 Nombre:</span>
+                                <span class="info-value" id="nombreCompleto"></span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">🆔 DNI:</span>
+                                <span class="info-value" id="dniNumero"></span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">🎂 Fecha Nacimiento:</span>
+                                <span class="info-value" id="fechaNacimiento"></span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">📅 Edad:</span>
+                                <span class="info-value" id="edadPersona"></span>
+                            </div>
+                        </div>
+
+                        <div class="status-badge" id="statusBadge">
+                            <!-- Se actualiza dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historial -->
+            <div class="historial-section">
+                <h3>📋 Últimos Escaneos</h3>
+                <div class="historial-list" id="historialList">
+                    <% if (historial.length === 0) { %>
+                        <p class="no-data">No hay escaneos registrados aún</p>
+                    <% } else { %>
+                        <% historial.forEach(function(item) { %>
+                            <div class="historial-item <%= item.esMayorDeEdad ? 'mayor' : 'menor' %>">
+                                <div class="historial-info">
+                                    <strong><%= item.nombre %> <%= item.apellido %></strong>
+                                    <span>DNI: <%= item.dni %> | Edad: <%= item.edad %> años</span>
+                                </div>
+                                <div class="historial-badge">
+                                    <%= item.esMayorDeEdad ? '✅ +18' : '⚠️ -18' %>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } %>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@zxing/library@latest/umd/index.min.js"></script>
+    <script src="/js/scanner.js"></script>
+</body>
+</html>
