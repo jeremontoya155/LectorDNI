@@ -2,15 +2,18 @@ let codeReader = null;
 let scanning = false;
 let lastScannedCode = null;
 let scanTimeout = null;
+let autoScanTimeout = null;
 
 // Elementos del DOM
 const video = document.getElementById('video');
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
 const newScanBtn = document.getElementById('newScanBtn');
+const quickScanBtn = document.getElementById('quickScanBtn');
 const scanSection = document.getElementById('scanSection');
 const resultSection = document.getElementById('resultSection');
 const contadorTotal = document.getElementById('contadorTotal');
+const autoScanTimer = document.getElementById('autoScanTimer');
 
 // Inicializar el lector de códigos
 function initScanner() {
@@ -176,6 +179,9 @@ function mostrarResultado(data) {
 
     // Agregar al historial en el frontend
     agregarAlHistorial(datos);
+
+    // Iniciar temporizador automático para el siguiente escaneo (8 segundos)
+    iniciarTemporizadorAutoScan();
 }
 
 // Agregar al historial visual
@@ -216,8 +222,58 @@ function stopScanner() {
     stopBtn.style.display = 'none';
 }
 
+// Temporizador automático para siguiente escaneo
+function iniciarTemporizadorAutoScan() {
+    let segundosRestantes = 8;
+    
+    // Limpiar temporizador anterior si existe
+    if (autoScanTimeout) {
+        clearInterval(autoScanTimeout);
+    }
+    
+    // Actualizar display inicial
+    if (autoScanTimer) {
+        autoScanTimer.textContent = segundosRestantes;
+        autoScanTimer.parentElement.style.display = 'flex';
+    }
+    
+    // Countdown
+    autoScanTimeout = setInterval(() => {
+        segundosRestantes--;
+        
+        if (autoScanTimer) {
+            autoScanTimer.textContent = segundosRestantes;
+        }
+        
+        if (segundosRestantes <= 0) {
+            clearInterval(autoScanTimeout);
+            escaneoRapido();
+        }
+    }, 1000);
+}
+
+// Cancelar temporizador automático
+function cancelarAutoScan() {
+    if (autoScanTimeout) {
+        clearInterval(autoScanTimeout);
+        autoScanTimeout = null;
+    }
+    if (autoScanTimer && autoScanTimer.parentElement) {
+        autoScanTimer.parentElement.style.display = 'none';
+    }
+}
+
+// Escaneo rápido (sin detener/iniciar cámara completamente)
+function escaneoRapido() {
+    cancelarAutoScan();
+    resultSection.style.display = 'none';
+    scanSection.style.display = 'block';
+    startScanner();
+}
+
 // Nuevo escaneo
 function nuevoEscaneo() {
+    cancelarAutoScan();
     resultSection.style.display = 'none';
     scanSection.style.display = 'block';
     startScanner();
@@ -227,6 +283,9 @@ function nuevoEscaneo() {
 startBtn.addEventListener('click', startScanner);
 stopBtn.addEventListener('click', stopScanner);
 newScanBtn.addEventListener('click', nuevoEscaneo);
+if (quickScanBtn) {
+    quickScanBtn.addEventListener('click', escaneoRapido);
+}
 
 // Inicializar al cargar la página
 window.addEventListener('load', () => {
@@ -236,5 +295,6 @@ window.addEventListener('load', () => {
 
 // Limpiar al cerrar la página
 window.addEventListener('beforeunload', () => {
+    cancelarAutoScan();
     stopScanner();
 });

@@ -55,7 +55,21 @@
                 <div class="result-card" id="resultCard">
                     <div class="result-header">
                         <h2>✅ Escaneo Exitoso</h2>
-                        <button id="newScanBtn" class="btn btn-secondary">Nuevo Escaneo</button>
+                        <div class="result-actions">
+                            <button id="quickScanBtn" class="btn btn-primary">
+                                <span class="btn-icon">⚡</span>
+                                Escanear Siguiente
+                            </button>
+                            <button id="newScanBtn" class="btn btn-secondary">
+                                <span class="btn-icon">🔄</span>
+                                Reiniciar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="auto-scan-notice">
+                        <span class="auto-scan-icon">⏱️</span>
+                        <span>Próximo escaneo automático en: <strong id="autoScanTimer">8</strong> segundos</span>
                     </div>
                     
                     <div class="result-content">
