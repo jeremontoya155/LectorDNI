@@ -13,6 +13,9 @@ const quickScanBtn = document.getElementById('quickScanBtn');
 const scanSection = document.getElementById('scanSection');
 const resultSection = document.getElementById('resultSection');
 const contadorTotal = document.getElementById('contadorTotal');
+const contadorMayores = document.getElementById('contadorMayores');
+const contadorMenores = document.getElementById('contadorMenores');
+const resetCountersBtn = document.getElementById('resetCountersBtn');
 const autoScanTimer = document.getElementById('autoScanTimer');
 
 // Inicializar el lector de códigos
@@ -129,13 +132,15 @@ async function procesarCodigo(codigo) {
 
 // Mostrar resultado
 function mostrarResultado(data) {
-    const { datos, contador } = data;
+    const { datos, contador, contadorMayores: mayores, contadorMenores: menores } = data;
 
     // Detener la cámara para liberar recursos
     stopScanner();
 
-    // Actualizar contador
+    // Actualizar contadores
     contadorTotal.textContent = contador;
+    if (contadorMayores) contadorMayores.textContent = mayores;
+    if (contadorMenores) contadorMenores.textContent = menores;
 
     // Llenar datos personales
     document.getElementById('nombreCompleto').textContent = datos.nombreCompleto;
@@ -284,6 +289,35 @@ stopBtn.addEventListener('click', stopScanner);
 newScanBtn.addEventListener('click', nuevoEscaneo);
 if (quickScanBtn) {
     quickScanBtn.addEventListener('click', escaneoRapido);
+}
+
+// Reiniciar contadores
+if (resetCountersBtn) {
+    resetCountersBtn.addEventListener('click', async () => {
+        if (confirm('¿Estás seguro de reiniciar todos los contadores?')) {
+            try {
+                const response = await fetch('/api/reiniciar-contadores', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                if (data.success) {
+                    // Actualizar contadores en pantalla
+                    contadorTotal.textContent = '0';
+                    if (contadorMayores) contadorMayores.textContent = '0';
+                    if (contadorMenores) contadorMenores.textContent = '0';
+                    
+                    // Limpiar historial visual
+                    const historialList = document.getElementById('historialList');
+                    historialList.innerHTML = '<p class="no-data">No hay escaneos registrados aún</p>';
+                    
+                    alert('✅ Contadores reiniciados correctamente');
+                }
+            } catch (error) {
+                console.error('Error al reiniciar contadores:', error);
+                alert('Error al reiniciar contadores');
+            }
+        }
+    });
 }
 
 // Inicializar al cargar la página

@@ -14,6 +14,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Contador local de escaneos
 let contadorEscaneos = 0;
+let contadorMayores = 0;
+let contadorMenores = 0;
 let historialEscaneos = [];
 
 // Función para decodificar el PDF417 del DNI argentino
@@ -79,6 +81,8 @@ function calcularEdad(fechaNacimiento) {
 app.get('/', (req, res) => {
     res.render('index', { 
         contador: contadorEscaneos,
+        contadorMayores: contadorMayores,
+        contadorMenores: contadorMenores,
         historial: historialEscaneos.slice(-10).reverse() // Últimos 10 escaneos
     });
 });
@@ -113,6 +117,13 @@ app.post('/procesar-dni', (req, res) => {
     const esMayorDeEdad = edad >= 18;
     
     contadorEscaneos++;
+    
+    // Incrementar contador correspondiente
+    if (esMayorDeEdad) {
+        contadorMayores++;
+    } else {
+        contadorMenores++;
+    }
     
     const registro = {
         timestamp: new Date().toLocaleString('es-AR'),
@@ -180,7 +191,25 @@ app.post('/procesar-dni', (req, res) => {
             idTramite: datosPersona.idTramite,
             esMayorDeEdad
         },
-        contador: contadorEscaneos
+        contador: contadorEscaneos,
+        contadorMayores: contadorMayores,
+        contadorMenores: contadorMenores
+    });
+});
+
+// Endpoint para reiniciar contadores
+app.post('/api/reiniciar-contadores', (req, res) => {
+    contadorEscaneos = 0;
+    contadorMayores = 0;
+    contadorMenores = 0;
+    historialEscaneos = [];
+    
+    console.log('\n🔄 CONTADORES REINICIADOS');
+    console.log('=================================\n');
+    
+    res.json({
+        success: true,
+        message: 'Contadores reiniciados correctamente'
     });
 });
 
@@ -188,6 +217,8 @@ app.post('/procesar-dni', (req, res) => {
 app.get('/api/estadisticas', (req, res) => {
     res.json({
         totalEscaneos: contadorEscaneos,
+        contadorMayores: contadorMayores,
+        contadorMenores: contadorMenores,
         historial: historialEscaneos.slice(-20).reverse()
     });
 });

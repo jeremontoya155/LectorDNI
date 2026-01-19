@@ -39,24 +39,61 @@ header h1 {
     margin: 0;
 }
 
+.contadores-wrapper {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
 .contador {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 15px 25px;
+    align-items: center;
+    padding: 10px 15px;
     border-radius: 10px;
     color: white;
+    min-width: 80px;
+}
+
+.contador-total {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.contador-mayores {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.contador-menores {
+    background: linear-gradient(135deg, #cb2d3e 0%, #ef473a 100%);
 }
 
 .contador-label {
-    font-size: 0.9em;
-    opacity: 0.9;
+    font-size: 0.75em;
+    opacity: 0.95;
+    font-weight: 500;
 }
 
 .contador-numero {
-    font-size: 2.5em;
+    font-size: 1.8em;
     font-weight: bold;
+}
+
+.btn-reset {
+    background: linear-gradient(135deg, #606c88 0%, #3f4c6b 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 15px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-reset:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
 main {
@@ -499,6 +536,24 @@ main {
 
     header h1 {
         font-size: 1.5em;
+    }
+
+    .contadores-wrapper {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .contador {
+        min-width: 70px;
+        padding: 8px 12px;
+    }
+
+    .contador-numero {
+        font-size: 1.5em;
+    }
+
+    .contador-label {
+        font-size: 0.7em;
     }
 
     main {

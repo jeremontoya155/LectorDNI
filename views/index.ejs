@@ -10,9 +10,22 @@
     <div class="container">
         <header>
             <h1>🇦🇷 Lector de DNI Argentino</h1>
-            <div class="contador">
-                <span class="contador-label">Escaneos totales:</span>
-                <span class="contador-numero" id="contadorTotal"><%= contador %></span>
+            <div class="contadores-wrapper">
+                <div class="contador contador-total">
+                    <span class="contador-label">Total</span>
+                    <span class="contador-numero" id="contadorTotal"><%= contador %></span>
+                </div>
+                <div class="contador contador-mayores">
+                    <span class="contador-label">✅ Mayores</span>
+                    <span class="contador-numero" id="contadorMayores"><%= contadorMayores %></span>
+                </div>
+                <div class="contador contador-menores">
+                    <span class="contador-label">🚫 Menores</span>
+                    <span class="contador-numero" id="contadorMenores"><%= contadorMenores %></span>
+                </div>
+                <button id="resetCountersBtn" class="btn btn-reset" title="Reiniciar contadores">
+                    🔄
+                </button>
             </div>
         </header>
 
