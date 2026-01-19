@@ -15,7 +15,10 @@ const resultSection = document.getElementById('resultSection');
 const contadorTotal = document.getElementById('contadorTotal');
 const contadorMayores = document.getElementById('contadorMayores');
 const contadorMenores = document.getElementById('contadorMenores');
+const contadorSalidas = document.getElementById('contadorSalidas');
 const resetCountersBtn = document.getElementById('resetCountersBtn');
+const salidaBtn = document.getElementById('salidaBtn');
+const contarMenoresCheck = document.getElementById('contarMenoresCheck');
 const autoScanTimer = document.getElementById('autoScanTimer');
 
 // Inicializar el lector de códigos
@@ -102,12 +105,18 @@ async function procesarCodigo(codigo) {
     try {
         console.log('📤 Enviando código al servidor...');
         
+        // Verificar si se deben contar los menores
+        const contarMenores = contarMenoresCheck ? contarMenoresCheck.checked : true;
+        
         const response = await fetch('/procesar-dni', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ codigoBarras: codigo })
+            body: JSON.stringify({ 
+                codigoBarras: codigo,
+                contarMenores: contarMenores
+            })
         });
 
         const data = await response.json();
@@ -132,7 +141,7 @@ async function procesarCodigo(codigo) {
 
 // Mostrar resultado
 function mostrarResultado(data) {
-    const { datos, contador, contadorMayores: mayores, contadorMenores: menores } = data;
+    const { datos, contador, contadorMayores: mayores, contadorMenores: menores, contadorSalidas: salidas } = data;
 
     // Detener la cámara para liberar recursos
     stopScanner();
@@ -141,6 +150,7 @@ function mostrarResultado(data) {
     contadorTotal.textContent = contador;
     if (contadorMayores) contadorMayores.textContent = mayores;
     if (contadorMenores) contadorMenores.textContent = menores;
+    if (contadorSalidas) contadorSalidas.textContent = salidas;
 
     // Llenar datos personales
     document.getElementById('nombreCompleto').textContent = datos.nombreCompleto;
@@ -305,6 +315,7 @@ if (resetCountersBtn) {
                     contadorTotal.textContent = '0';
                     if (contadorMayores) contadorMayores.textContent = '0';
                     if (contadorMenores) contadorMenores.textContent = '0';
+                    if (contadorSalidas) contadorSalidas.textContent = '0';
                     
                     // Limpiar historial visual
                     const historialList = document.getElementById('historialList');
@@ -316,6 +327,25 @@ if (resetCountersBtn) {
                 console.error('Error al reiniciar contadores:', error);
                 alert('Error al reiniciar contadores');
             }
+        }
+    });
+}
+
+// Registrar salida
+if (salidaBtn) {
+    salidaBtn.addEventListener('click', async () => {
+        try {
+            const response = await fetch('/api/registrar-salida', {
+                method: 'POST'
+            });
+            const data = await response.json();
+            if (data.success) {
+                if (contadorSalidas) contadorSalidas.textContent = data.contadorSalidas;
+                console.log('🚪 Salida registrada');
+            }
+        } catch (error) {
+            console.error('Error al registrar salida:', error);
+            alert('Error al registrar salida');
         }
     });
 }

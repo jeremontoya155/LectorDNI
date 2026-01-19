@@ -16,6 +16,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 let contadorEscaneos = 0;
 let contadorMayores = 0;
 let contadorMenores = 0;
+let contadorSalidas = 0;
 let historialEscaneos = [];
 
 // Función para decodificar el PDF417 del DNI argentino
@@ -83,13 +84,14 @@ app.get('/', (req, res) => {
         contador: contadorEscaneos,
         contadorMayores: contadorMayores,
         contadorMenores: contadorMenores,
+        contadorSalidas: contadorSalidas,
         historial: historialEscaneos.slice(-10).reverse() // Últimos 10 escaneos
     });
 });
 
 // Endpoint para procesar el código de barras
 app.post('/procesar-dni', (req, res) => {
-    const { codigoBarras } = req.body;
+    const { codigoBarras, contarMenores } = req.body;
     
     if (!codigoBarras) {
         return res.status(400).json({ 
@@ -102,6 +104,7 @@ app.post('/procesar-dni', (req, res) => {
     console.log('📷 NUEVO ESCANEO RECIBIDO');
     console.log('=================================');
     console.log('Código raw:', codigoBarras);
+    console.log('Contar menores:', contarMenores ? 'SÍ' : 'NO');
     
     const datosPersona = decodificarDNI(codigoBarras);
     
@@ -120,9 +123,16 @@ app.post('/procesar-dni', (req, res) => {
     
     // Incrementar contador correspondiente
     if (esMayorDeEdad) {
+        // Mayores siempre se cuentan como entradas
         contadorMayores++;
     } else {
+        // Menores: siempre se registran en su contador, pero solo suman a entradas si está activado
         contadorMenores++;
+        if (contarMenores) {
+            // Si está activado "contar menores", también suma a entradas
+            // (opcional: descomentar la siguiente línea si quieres que sumen a entradas)
+            // contadorMayores++;
+        }
     }
     
     const registro = {
@@ -193,7 +203,22 @@ app.post('/procesar-dni', (req, res) => {
         },
         contador: contadorEscaneos,
         contadorMayores: contadorMayores,
-        contadorMenores: contadorMenores
+        contadorMenores: contadorMenores,
+        contadorSalidas: contadorSalidas
+    });
+});
+
+// Endpoint para registrar salida
+app.post('/api/registrar-salida', (req, res) => {
+    contadorSalidas++;
+    
+    console.log('\n🚪 SALIDA REGISTRADA');
+    console.log(`Total salidas: ${contadorSalidas}`);
+    console.log('=================================\n');
+    
+    res.json({
+        success: true,
+        contadorSalidas: contadorSalidas
     });
 });
 
@@ -202,6 +227,7 @@ app.post('/api/reiniciar-contadores', (req, res) => {
     contadorEscaneos = 0;
     contadorMayores = 0;
     contadorMenores = 0;
+    contadorSalidas = 0;
     historialEscaneos = [];
     
     console.log('\n🔄 CONTADORES REINICIADOS');
@@ -219,6 +245,7 @@ app.get('/api/estadisticas', (req, res) => {
         totalEscaneos: contadorEscaneos,
         contadorMayores: contadorMayores,
         contadorMenores: contadorMenores,
+        contadorSalidas: contadorSalidas,
         historial: historialEscaneos.slice(-20).reverse()
     });
 });

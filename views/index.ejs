@@ -16,16 +16,32 @@
                     <span class="contador-numero" id="contadorTotal"><%= contador %></span>
                 </div>
                 <div class="contador contador-mayores">
-                    <span class="contador-label">✅ Mayores</span>
+                    <span class="contador-label">✅ Entradas</span>
                     <span class="contador-numero" id="contadorMayores"><%= contadorMayores %></span>
                 </div>
+                <div class="contador contador-salidas">
+                    <span class="contador-label">🚪 Salidas</span>
+                    <span class="contador-numero" id="contadorSalidas"><%= contadorSalidas %></span>
+                </div>
                 <div class="contador contador-menores">
-                    <span class="contador-label">🚫 Menores</span>
+                    <span class="contador-label">⚠️ Menores</span>
                     <span class="contador-numero" id="contadorMenores"><%= contadorMenores %></span>
                 </div>
-                <button id="resetCountersBtn" class="btn btn-reset" title="Reiniciar contadores">
-                    🔄
+            </div>
+            <div class="header-actions">
+                <button id="salidaBtn" class="btn btn-salida">
+                    🚪 Registrar Salida
                 </button>
+                <button id="resetCountersBtn" class="btn btn-reset" title="Reiniciar contadores">
+                    🔄 Reiniciar
+                </button>
+            </div>
+            <div class="config-menores">
+                <label class="switch-label">
+                    <input type="checkbox" id="contarMenoresCheck" checked>
+                    <span class="switch-slider"></span>
+                    <span class="switch-text">Contar menores (si está OFF, solo se registran)</span>
+                </label>
             </div>
         </header>
 

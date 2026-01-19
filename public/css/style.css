@@ -64,8 +64,12 @@ header h1 {
     background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
 }
 
+.contador-salidas {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
 .contador-menores {
-    background: linear-gradient(135deg, #cb2d3e 0%, #ef473a 100%);
+    background: linear-gradient(135deg, #606c88 0%, #3f4c6b 100%);
 }
 
 .contador-label {
@@ -84,8 +88,8 @@ header h1 {
     color: white;
     border: none;
     border-radius: 10px;
-    padding: 15px;
-    font-size: 1.2em;
+    padding: 10px 15px;
+    font-size: 0.9em;
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
@@ -94,6 +98,86 @@ header h1 {
 .btn-reset:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.btn-salida {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-salida:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Switch para opción de menores */
+.config-menores {
+    margin-top: 15px;
+    padding: 10px 15px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+}
+
+.switch-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 0.9em;
+    color: #555;
+}
+
+.switch-label input {
+    display: none;
+}
+
+.switch-slider {
+    position: relative;
+    width: 50px;
+    height: 26px;
+    background: #ccc;
+    border-radius: 26px;
+    transition: 0.3s;
+}
+
+.switch-slider:before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: white;
+    top: 3px;
+    left: 3px;
+    transition: 0.3s;
+}
+
+.switch-label input:checked + .switch-slider {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.switch-label input:checked + .switch-slider:before {
+    transform: translateX(24px);
+}
+
+.switch-text {
+    flex: 1;
 }
 
 main {
@@ -544,16 +628,28 @@ main {
     }
 
     .contador {
-        min-width: 70px;
-        padding: 8px 12px;
+        min-width: 65px;
+        padding: 8px 10px;
     }
 
     .contador-numero {
-        font-size: 1.5em;
+        font-size: 1.4em;
     }
 
     .contador-label {
-        font-size: 0.7em;
+        font-size: 0.65em;
+    }
+
+    .header-actions {
+        width: 100%;
+    }
+
+    .config-menores {
+        width: 100%;
+    }
+
+    .switch-text {
+        font-size: 0.8em;
     }
 
     main {
