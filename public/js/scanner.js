@@ -341,7 +341,8 @@ if (salidaBtn) {
             const data = await response.json();
             if (data.success) {
                 if (contadorSalidas) contadorSalidas.textContent = data.contadorSalidas;
-                console.log('🚪 Salida registrada');
+                if (contadorMayores) contadorMayores.textContent = data.contadorMayores;
+                console.log('🚪 Salida registrada - Entradas actualizadas');
             }
         } catch (error) {
             console.error('Error al registrar salida:', error);

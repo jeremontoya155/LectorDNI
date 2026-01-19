@@ -126,13 +126,8 @@ app.post('/procesar-dni', (req, res) => {
         // Mayores siempre se cuentan como entradas
         contadorMayores++;
     } else {
-        // Menores: siempre se registran en su contador, pero solo suman a entradas si está activado
+        // Menores: SOLO se registran en su contador, NUNCA suman a entradas
         contadorMenores++;
-        if (contarMenores) {
-            // Si está activado "contar menores", también suma a entradas
-            // (opcional: descomentar la siguiente línea si quieres que sumen a entradas)
-            // contadorMayores++;
-        }
     }
     
     const registro = {
@@ -212,13 +207,20 @@ app.post('/procesar-dni', (req, res) => {
 app.post('/api/registrar-salida', (req, res) => {
     contadorSalidas++;
     
+    // Restar 1 del contador de entradas (no puede ser negativo)
+    if (contadorMayores > 0) {
+        contadorMayores--;
+    }
+    
     console.log('\n🚪 SALIDA REGISTRADA');
+    console.log(`Entradas actuales: ${contadorMayores}`);
     console.log(`Total salidas: ${contadorSalidas}`);
     console.log('=================================\n');
     
     res.json({
         success: true,
-        contadorSalidas: contadorSalidas
+        contadorSalidas: contadorSalidas,
+        contadorMayores: contadorMayores
     });
 });
 
