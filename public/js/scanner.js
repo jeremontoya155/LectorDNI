@@ -131,10 +131,8 @@ async function procesarCodigo(codigo) {
 function mostrarResultado(data) {
     const { datos, contador } = data;
 
-    // No detener la cámara aquí para evitar que algunos dispositivos tarden en
-    // reabrir el stream (provocando pantalla negra). Mantener el stream abierto
-    // y simplemente pausar el escaneo. Si no hay stream activo, no pasa nada.
-    scanning = false;
+    // Detener la cámara para liberar recursos
+    stopScanner();
 
     // Actualizar contador
     contadorTotal.textContent = contador;
@@ -182,38 +180,8 @@ function mostrarResultado(data) {
     // Agregar al historial en el frontend
     agregarAlHistorial(datos);
 
-    // Iniciar temporizador automático para el siguiente escaneo (8 segundos)
+    // Iniciar temporizador automático - RECARGA LA PÁGINA con auto-start
     iniciarTemporizadorAutoScan();
-}
-
-// Reanudar escaneo reutilizando el stream si ya está abierto
-function resumeScan() {
-    cancelarAutoScan();
-    resultSection.style.display = 'none';
-    scanSection.style.display = 'block';
-
-    // Verificar si el stream sigue activo y funcionando
-    if (video.srcObject && video.srcObject.active) {
-        // Stream activo - simplemente reanudar el escaneo
-        console.log('✅ Reutilizando stream existente - reinicio instantáneo');
-        scanning = true;
-        startBtn.style.display = 'none';
-        stopBtn.style.display = 'inline-flex';
-        
-        // Asegurar que el video esté reproduciendo
-        if (video.paused) {
-            video.play().catch(err => {
-                console.warn('Error al reanudar video:', err);
-            });
-        }
-        
-        // Reiniciar el loop de escaneo inmediatamente
-        scanContinuously();
-    } else {
-        // No hay stream activo - iniciar proceso normal
-        console.log('⚠️ No hay stream activo, iniciando cámara...');
-        startScanner();
-    }
 }
 
 // Agregar al historial visual
@@ -254,9 +222,9 @@ function stopScanner() {
     stopBtn.style.display = 'none';
 }
 
-// Temporizador automático para siguiente escaneo
+// Temporizador automático - RECARGA la página con parámetro para auto-iniciar
 function iniciarTemporizadorAutoScan() {
-    let segundosRestantes = 4; // Reducido a 4 segundos para mayor fluidez
+    let segundosRestantes = 3; // 3 segundos para ver el resultado
     
     // Limpiar temporizador anterior si existe
     if (autoScanTimeout) {
@@ -279,7 +247,8 @@ function iniciarTemporizadorAutoScan() {
         
         if (segundosRestantes <= 0) {
             clearInterval(autoScanTimeout);
-            escaneoRapido();
+            // RECARGAR PÁGINA con parámetro para auto-iniciar cámara
+            window.location.href = '/?autostart=1';
         }
     }, 1000);
 }
@@ -295,20 +264,18 @@ function cancelarAutoScan() {
     }
 }
 
-// Escaneo rápido (sin detener/iniciar cámara completamente)
+// Escaneo rápido - RECARGA INMEDIATA
 function escaneoRapido() {
     cancelarAutoScan();
-    resultSection.style.display = 'none';
-    scanSection.style.display = 'block';
-    resumeScan();
+    // Recargar página inmediatamente con auto-start
+    window.location.href = '/?autostart=1';
 }
 
-// Nuevo escaneo
+// Nuevo escaneo - RECARGA INMEDIATA
 function nuevoEscaneo() {
     cancelarAutoScan();
-    resultSection.style.display = 'none';
-    scanSection.style.display = 'block';
-    resumeScan();
+    // Recargar página inmediatamente con auto-start
+    window.location.href = '/?autostart=1';
 }
 
 // Event Listeners
@@ -323,6 +290,16 @@ if (quickScanBtn) {
 window.addEventListener('load', () => {
     initScanner();
     console.log('🚀 Aplicación lista para escanear DNIs');
+    
+    // AUTO-INICIAR CÁMARA si viene con el parámetro autostart
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('autostart') === '1') {
+        console.log('⚡ Auto-iniciando cámara...');
+        // Pequeño delay para asegurar que todo esté listo
+        setTimeout(() => {
+            startScanner();
+        }, 300);
+    }
 });
 
 // Limpiar al cerrar la página
