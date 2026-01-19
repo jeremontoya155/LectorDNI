@@ -131,8 +131,10 @@ async function procesarCodigo(codigo) {
 function mostrarResultado(data) {
     const { datos, contador } = data;
 
-    // Detener cámara
-    stopScanner();
+    // No detener la cámara aquí para evitar que algunos dispositivos tarden en
+    // reabrir el stream (provocando pantalla negra). Mantener el stream abierto
+    // y simplemente pausar el escaneo. Si no hay stream activo, no pasa nada.
+    scanning = false;
 
     // Actualizar contador
     contadorTotal.textContent = contador;
@@ -184,6 +186,36 @@ function mostrarResultado(data) {
     iniciarTemporizadorAutoScan();
 }
 
+// Reanudar escaneo reutilizando el stream si ya está abierto
+function resumeScan() {
+    cancelarAutoScan();
+    resultSection.style.display = 'none';
+    scanSection.style.display = 'block';
+
+    // Verificar si el stream sigue activo y funcionando
+    if (video.srcObject && video.srcObject.active) {
+        // Stream activo - simplemente reanudar el escaneo
+        console.log('✅ Reutilizando stream existente - reinicio instantáneo');
+        scanning = true;
+        startBtn.style.display = 'none';
+        stopBtn.style.display = 'inline-flex';
+        
+        // Asegurar que el video esté reproduciendo
+        if (video.paused) {
+            video.play().catch(err => {
+                console.warn('Error al reanudar video:', err);
+            });
+        }
+        
+        // Reiniciar el loop de escaneo inmediatamente
+        scanContinuously();
+    } else {
+        // No hay stream activo - iniciar proceso normal
+        console.log('⚠️ No hay stream activo, iniciando cámara...');
+        startScanner();
+    }
+}
+
 // Agregar al historial visual
 function agregarAlHistorial(datos) {
     const historialList = document.getElementById('historialList');
@@ -224,7 +256,7 @@ function stopScanner() {
 
 // Temporizador automático para siguiente escaneo
 function iniciarTemporizadorAutoScan() {
-    let segundosRestantes = 8;
+    let segundosRestantes = 4; // Reducido a 4 segundos para mayor fluidez
     
     // Limpiar temporizador anterior si existe
     if (autoScanTimeout) {
@@ -268,7 +300,7 @@ function escaneoRapido() {
     cancelarAutoScan();
     resultSection.style.display = 'none';
     scanSection.style.display = 'block';
-    startScanner();
+    resumeScan();
 }
 
 // Nuevo escaneo
@@ -276,7 +308,7 @@ function nuevoEscaneo() {
     cancelarAutoScan();
     resultSection.style.display = 'none';
     scanSection.style.display = 'block';
-    startScanner();
+    resumeScan();
 }
 
 // Event Listeners

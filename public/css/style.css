@@ -71,6 +71,7 @@ main {
 /* Sección de escaneo */
 .scan-section {
     text-align: center;
+    transition: all 0.3s ease;
 }
 
 .camera-container {
@@ -81,6 +82,17 @@ main {
     border-radius: 15px;
     overflow: hidden;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+/* Cuando está oculta la sección de escaneo, el video sigue ahí pero invisible */
+.scan-section[style*="display: none"] .camera-container {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
 }
 
 #video {
