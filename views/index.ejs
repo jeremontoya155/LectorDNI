@@ -2,39 +2,38 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lector DNI Argentino</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0a0a0f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>DNI Scanner</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🇦🇷 Lector de DNI Argentino</h1>
+            <h1>⚡ DNI Scanner</h1>
             <div class="contadores-wrapper">
-                <div class="contador contador-total">
-                    <span class="contador-label">Total</span>
-                    <span class="contador-numero" id="contadorTotal"><%= contador %></span>
-                </div>
                 <div class="contador contador-mayores">
-                    <span class="contador-label">✅ Entradas</span>
                     <span class="contador-numero" id="contadorMayores"><%= contadorMayores %></span>
+                    <span class="contador-label">Dentro</span>
                 </div>
                 <div class="contador contador-salidas">
-                    <span class="contador-label">🚪 Salidas</span>
                     <span class="contador-numero" id="contadorSalidas"><%= contadorSalidas %></span>
+                    <span class="contador-label">Salidas</span>
                 </div>
                 <div class="contador contador-menores">
-                    <span class="contador-label">⚠️ Menores</span>
                     <span class="contador-numero" id="contadorMenores"><%= contadorMenores %></span>
+                    <span class="contador-label">Menores</span>
+                </div>
+                <div class="contador contador-total">
+                    <span class="contador-numero" id="contadorTotal"><%= contador %></span>
+                    <span class="contador-label">Total</span>
                 </div>
             </div>
             <div class="header-actions">
-                <button id="salidaBtn" class="btn btn-salida">
-                    🚪 Registrar Salida
-                </button>
-                <button id="resetCountersBtn" class="btn btn-reset" title="Reiniciar contadores">
-                    🔄 Reiniciar
-                </button>
+                <button id="salidaBtn" class="btn-salida">🚪 Salida</button>
+                <button id="resetCountersBtn" class="btn-reset">🔄 Reset</button>
             </div>
         </header>
 
@@ -57,114 +56,91 @@
 
                 <div class="controls">
                     <button id="startBtn" class="btn btn-primary">
-                        <span class="btn-icon">📷</span>
-                        Iniciar Escáner
+                        📷 Iniciar Cámara
                     </button>
                     <button id="stopBtn" class="btn btn-danger" style="display: none;">
-                        <span class="btn-icon">⏹️</span>
-                        Detener Cámara
+                        ⏹️ Detener
                     </button>
                 </div>
 
                 <div class="instructions">
                     <p>📌 Posiciona el código de barras del DNI dentro del marco</p>
-                    <p>🔍 El escaneo es automático - mantén el DNI estable</p>
                 </div>
             </div>
 
             <!-- Sección de resultados -->
             <div class="result-section" id="resultSection" style="display: none;">
                 <div class="result-card" id="resultCard">
-                    <div class="result-header">
-                        <h2>✅ Escaneo Exitoso</h2>
-                        <div class="result-actions">
-                            <button id="quickScanBtn" class="btn btn-primary">
-                                <span class="btn-icon">⚡</span>
-                                Escanear Siguiente
-                            </button>
-                            <button id="newScanBtn" class="btn btn-secondary">
-                                <span class="btn-icon">🔄</span>
-                                Reiniciar
-                            </button>
-                        </div>
+                    <div class="status-badge" id="statusBadge">
+                        <!-- Se actualiza dinámicamente -->
                     </div>
 
                     <div class="auto-scan-notice">
                         <span class="auto-scan-icon">⏱️</span>
-                        <span>Siguiente escaneo en: <strong id="autoScanTimer">3</strong> segundos</span>
+                        <span>Siguiente en <strong id="autoScanTimer">3</strong>s</span>
+                        <button id="quickScanBtn" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.85em;">
+                            ⚡ Ahora
+                        </button>
                     </div>
                     
                     <div class="result-content">
-                        <div class="status-badge" id="statusBadge">
-                            <!-- Se actualiza dinámicamente -->
-                        </div>
-
                         <div class="datos-sections">
                             <div class="datos-section">
-                                <h3 class="section-title">👤 DATOS PERSONALES</h3>
+                                <h3 class="section-title">👤 Persona</h3>
                                 <div class="person-info">
                                     <div class="info-row">
-                                        <span class="info-label">Nombre Completo:</span>
+                                        <span class="info-label">Nombre</span>
                                         <span class="info-value" id="nombreCompleto"></span>
                                     </div>
                                     <div class="info-row">
-                                        <span class="info-label">🆔 DNI:</span>
+                                        <span class="info-label">DNI</span>
                                         <span class="info-value" id="dniNumero"></span>
                                     </div>
                                     <div class="info-row">
-                                        <span class="info-label">💼 CUIL:</span>
-                                        <span class="info-value" id="cuil"></span>
-                                    </div>
-                                    <div class="info-row">
-                                        <span class="info-label">⚧️ Sexo:</span>
-                                        <span class="info-value" id="sexo"></span>
-                                    </div>
-                                    <div class="info-row">
-                                        <span class="info-label">🎂 Fecha Nacimiento:</span>
-                                        <span class="info-value" id="fechaNacimiento"></span>
-                                    </div>
-                                    <div class="info-row">
-                                        <span class="info-label">📅 Edad:</span>
+                                        <span class="info-label">Edad</span>
                                         <span class="info-value" id="edadPersona"></span>
                                     </div>
                                     <div class="info-row">
-                                        <span class="info-label">🌍 Nacionalidad:</span>
-                                        <span class="info-value" id="nacionalidad"></span>
+                                        <span class="info-label">Sexo</span>
+                                        <span class="info-value" id="sexo"></span>
                                     </div>
                                     <div class="info-row">
-                                        <span class="info-label">📍 Lugar Nacimiento:</span>
-                                        <span class="info-value" id="lugarNacimiento"></span>
-                                    </div>
-                                    <div class="info-row" id="paisRow" style="display: none;">
-                                        <span class="info-label">🗺️ País Nacimiento:</span>
-                                        <span class="info-value" id="paisNacimiento"></span>
+                                        <span class="info-label">Nacimiento</span>
+                                        <span class="info-value" id="fechaNacimiento"></span>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="datos-section">
-                                <h3 class="section-title">📄 DATOS DEL DOCUMENTO</h3>
+                                <h3 class="section-title">📄 Documento</h3>
                                 <div class="person-info">
                                     <div class="info-row">
-                                        <span class="info-label">📄 N° Trámite:</span>
+                                        <span class="info-label">CUIL</span>
+                                        <span class="info-value" id="cuil"></span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Trámite</span>
                                         <span class="info-value" id="tramite"></span>
                                     </div>
                                     <div class="info-row">
-                                        <span class="info-label">📌 Ejemplar:</span>
+                                        <span class="info-label">Ejemplar</span>
                                         <span class="info-value" id="ejemplar"></span>
                                     </div>
                                     <div class="info-row">
-                                        <span class="info-label">📤 Fecha Emisión:</span>
-                                        <span class="info-value" id="fechaEmision"></span>
-                                    </div>
-                                    <div class="info-row">
-                                        <span class="info-label">📆 Vencimiento:</span>
+                                        <span class="info-label">Vencimiento</span>
                                         <span class="info-value" id="fechaVencimiento"></span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Hidden fields for compatibility -->
+                    <span id="nacionalidad" style="display:none;"></span>
+                    <span id="lugarNacimiento" style="display:none;"></span>
+                    <span id="paisNacimiento" style="display:none;"></span>
+                    <span id="fechaEmision" style="display:none;"></span>
+                    <div id="paisRow" style="display:none;"></div>
                 </div>
             </div>
 
@@ -173,16 +149,16 @@
                 <h3>📋 Últimos Escaneos</h3>
                 <div class="historial-list" id="historialList">
                     <% if (historial.length === 0) { %>
-                        <p class="no-data">No hay escaneos registrados aún</p>
+                        <p class="no-data">Sin escaneos aún</p>
                     <% } else { %>
                         <% historial.forEach(function(item) { %>
                             <div class="historial-item <%= item.esMayorDeEdad ? 'mayor' : 'menor' %>">
                                 <div class="historial-info">
                                     <strong><%= item.nombre %> <%= item.apellido %></strong>
-                                    <span>DNI: <%= item.dni %> | Edad: <%= item.edad %> años</span>
+                                    <span>DNI: <%= item.dni %> • <%= item.edad %> años</span>
                                 </div>
                                 <div class="historial-badge">
-                                    <%= item.esMayorDeEdad ? '✅ +18' : '⚠️ -18' %>
+                                    <%= item.esMayorDeEdad ? '✓ +18' : '⚠ -18' %>
                                 </div>
                             </div>
                         <% }); %>

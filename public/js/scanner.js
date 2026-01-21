@@ -8,7 +8,6 @@ let autoScanTimeout = null;
 const video = document.getElementById('video');
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
-const newScanBtn = document.getElementById('newScanBtn');
 const quickScanBtn = document.getElementById('quickScanBtn');
 const scanSection = document.getElementById('scanSection');
 const resultSection = document.getElementById('resultSection');
@@ -203,15 +202,19 @@ function mostrarResultado(data) {
 function agregarAlHistorial(datos) {
     const historialList = document.getElementById('historialList');
     
+    // Limpiar mensaje de "sin escaneos"
+    const noData = historialList.querySelector('.no-data');
+    if (noData) noData.remove();
+    
     const item = document.createElement('div');
     item.className = `historial-item ${datos.esMayorDeEdad ? 'mayor' : 'menor'}`;
     item.innerHTML = `
         <div class="historial-info">
             <strong>${datos.nombreCompleto}</strong>
-            <span>DNI: ${datos.dni} | Edad: ${datos.edad} años</span>
+            <span>DNI: ${datos.dni} • ${datos.edad} años</span>
         </div>
         <div class="historial-badge">
-            ${datos.esMayorDeEdad ? '✅ +18' : '⚠️ -18'}
+            ${datos.esMayorDeEdad ? '✓ +18' : '⚠ -18'}
         </div>
     `;
     
@@ -296,7 +299,6 @@ function nuevoEscaneo() {
 // Event Listeners
 startBtn.addEventListener('click', startScanner);
 stopBtn.addEventListener('click', stopScanner);
-newScanBtn.addEventListener('click', nuevoEscaneo);
 if (quickScanBtn) {
     quickScanBtn.addEventListener('click', escaneoRapido);
 }
@@ -304,7 +306,7 @@ if (quickScanBtn) {
 // Reiniciar contadores
 if (resetCountersBtn) {
     resetCountersBtn.addEventListener('click', async () => {
-        if (confirm('¿Estás seguro de reiniciar todos los contadores?')) {
+        if (confirm('¿Reiniciar todos los contadores?')) {
             try {
                 const response = await fetch('/api/reiniciar-contadores', {
                     method: 'POST'
@@ -319,13 +321,10 @@ if (resetCountersBtn) {
                     
                     // Limpiar historial visual
                     const historialList = document.getElementById('historialList');
-                    historialList.innerHTML = '<p class="no-data">No hay escaneos registrados aún</p>';
-                    
-                    alert('✅ Contadores reiniciados correctamente');
+                    historialList.innerHTML = '<p class="no-data">Sin escaneos aún</p>';
                 }
             } catch (error) {
                 console.error('Error al reiniciar contadores:', error);
-                alert('Error al reiniciar contadores');
             }
         }
     });
@@ -342,11 +341,12 @@ if (salidaBtn) {
             if (data.success) {
                 if (contadorSalidas) contadorSalidas.textContent = data.contadorSalidas;
                 if (contadorMayores) contadorMayores.textContent = data.contadorMayores;
-                console.log('🚪 Salida registrada - Entradas actualizadas');
+                // Feedback visual rápido
+                salidaBtn.style.transform = 'scale(0.95)';
+                setTimeout(() => salidaBtn.style.transform = '', 100);
             }
         } catch (error) {
             console.error('Error al registrar salida:', error);
-            alert('Error al registrar salida');
         }
     });
 }
