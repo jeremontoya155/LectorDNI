@@ -4,6 +4,16 @@ let lastScannedCode = null;
 let scanTimeout = null;
 let autoScanTimeout = null;
 
+// ===========================================
+// DETECCIÓN DE DISPOSITIVO Y MODO DE ESCANEO
+// ===========================================
+let modoActual = 'camera'; // 'camera' o 'scanner'
+let esColector = false;
+let barcodeBuffer = '';
+let barcodeTimeout = null;
+const BARCODE_TIMEOUT = 100; // ms - tiempo máximo entre caracteres de un código
+const MIN_BARCODE_LENGTH = 20; // Longitud mínima del código de barras del DNI
+
 // Elementos del DOM
 const video = document.getElementById('video');
 const startBtn = document.getElementById('startBtn');
@@ -19,6 +29,192 @@ const resetCountersBtn = document.getElementById('resetCountersBtn');
 const salidaBtn = document.getElementById('salidaBtn');
 const contarMenoresCheck = document.getElementById('contarMenoresCheck');
 const autoScanTimer = document.getElementById('autoScanTimer');
+
+// Elementos del modo lector físico
+const scanModeIndicator = document.getElementById('scanModeIndicator');
+const modeCameraTab = document.getElementById('modeCameraTab');
+const modeScannerTab = document.getElementById('modeScannerTab');
+const cameraContainer = document.getElementById('cameraContainer');
+const scannerModeContainer = document.getElementById('scannerModeContainer');
+const barcodeInput = document.getElementById('barcodeInput');
+const inputIndicator = document.getElementById('inputIndicator');
+const deviceStatus = document.getElementById('deviceStatus');
+const statusDot = document.getElementById('statusDot');
+const statusText = document.getElementById('statusText');
+const cameraInstructions = document.getElementById('cameraInstructions');
+
+// ===========================================
+// DETECCIÓN DE TIPO DE DISPOSITIVO
+// ===========================================
+function detectarTipoDispositivo() {
+    const userAgent = navigator.userAgent.toLowerCase();
+    
+    // Detectar colectores comunes (Zebra, Honeywell, Motorola, Datalogic, etc.)
+    const colectores = [
+        'zebra', 'honeywell', 'motorola', 'symbol', 'datalogic', 
+        'intermec', 'opticon', 'cipher', 'unitech', 'm3mobile',
+        'android.*scanner', 'android.*barcode', 'android.*pda'
+    ];
+    
+    esColector = colectores.some(c => userAgent.includes(c) || 
+        (c.includes('.*') && new RegExp(c).test(userAgent)));
+    
+    // También detectar si NO hay cámara disponible
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        esColector = true;
+    }
+    
+    // Verificar si es un dispositivo móvil con características de colector
+    const esMovil = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+    const tienePantallaPequena = window.screen.width < 600;
+    
+    console.log('📱 Detección de dispositivo:');
+    console.log('   User Agent:', userAgent);
+    console.log('   Es colector detectado:', esColector);
+    console.log('   Es móvil:', esMovil);
+    console.log('   Pantalla pequeña:', tienePantallaPequena);
+    
+    return {
+        esColector,
+        esMovil,
+        tienePantallaPequena,
+        tieneCamera: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
+    };
+}
+
+// ===========================================
+// CAMBIO DE MODO DE ESCANEO
+// ===========================================
+function cambiarModo(modo) {
+    modoActual = modo;
+    
+    // Actualizar tabs
+    document.querySelectorAll('.mode-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelector(`[data-mode="${modo}"]`)?.classList.add('active');
+    
+    if (modo === 'camera') {
+        // Modo cámara
+        if (cameraContainer) cameraContainer.style.display = 'block';
+        if (scannerModeContainer) scannerModeContainer.style.display = 'none';
+        if (startBtn) startBtn.style.display = 'inline-flex';
+        if (cameraInstructions) cameraInstructions.style.display = 'block';
+        
+        // Desactivar captura de teclado global
+        document.removeEventListener('keypress', capturarEntradaGlobal);
+        
+        actualizarEstadoDispositivo('camera', 'Modo cámara activo');
+        
+    } else if (modo === 'scanner') {
+        // Modo lector físico
+        stopScanner(); // Detener cámara si está activa
+        
+        if (cameraContainer) cameraContainer.style.display = 'none';
+        if (scannerModeContainer) scannerModeContainer.style.display = 'flex';
+        if (startBtn) startBtn.style.display = 'none';
+        if (stopBtn) stopBtn.style.display = 'none';
+        if (cameraInstructions) cameraInstructions.style.display = 'none';
+        
+        // Activar captura de teclado global para detectar pistola
+        document.addEventListener('keypress', capturarEntradaGlobal);
+        
+        // Enfocar el input para colectores que lo necesiten
+        if (barcodeInput) {
+            barcodeInput.value = '';
+            barcodeInput.focus();
+        }
+        
+        actualizarEstadoDispositivo('scanner', 'Esperando escaneo del lector...');
+    }
+    
+    console.log(`🔄 Modo cambiado a: ${modo}`);
+}
+
+// Actualizar indicador de estado del dispositivo
+function actualizarEstadoDispositivo(tipo, mensaje, estado = 'ready') {
+    if (statusText) statusText.textContent = mensaje;
+    if (statusDot) {
+        statusDot.className = 'status-dot';
+        if (estado === 'ready') statusDot.classList.add('ready');
+        else if (estado === 'active') statusDot.classList.add('active');
+        else if (estado === 'success') statusDot.classList.add('success');
+        else if (estado === 'error') statusDot.classList.add('error');
+    }
+}
+
+// ===========================================
+// CAPTURA DE ENTRADA DE LECTOR FÍSICO
+// ===========================================
+function capturarEntradaGlobal(e) {
+    // Ignorar si estamos en un input normal (excepto el de código de barras)
+    if (e.target.tagName === 'INPUT' && e.target.id !== 'barcodeInput') {
+        return;
+    }
+    
+    // Prevenir comportamiento por defecto si estamos en modo scanner
+    if (modoActual === 'scanner' && e.target.id !== 'barcodeInput') {
+        e.preventDefault();
+    }
+    
+    // Limpiar timeout anterior
+    if (barcodeTimeout) {
+        clearTimeout(barcodeTimeout);
+    }
+    
+    // Agregar carácter al buffer
+    if (e.key === 'Enter') {
+        // Enter = fin del código de barras
+        procesarBufferBarcode();
+    } else if (e.key.length === 1) {
+        // Solo caracteres individuales (no teclas especiales)
+        barcodeBuffer += e.key;
+        
+        // Mostrar indicador de que se está recibiendo datos
+        actualizarEstadoDispositivo('scanner', `Recibiendo código: ${barcodeBuffer.length} caracteres...`, 'active');
+        if (inputIndicator) inputIndicator.textContent = '📥 Recibiendo datos...';
+        
+        // Actualizar input visible
+        if (barcodeInput) barcodeInput.value = barcodeBuffer;
+    }
+    
+    // Timeout para procesar si no llega más datos
+    barcodeTimeout = setTimeout(() => {
+        if (barcodeBuffer.length >= MIN_BARCODE_LENGTH) {
+            procesarBufferBarcode();
+        } else if (barcodeBuffer.length > 0) {
+            console.log('⚠️ Código muy corto, ignorando:', barcodeBuffer);
+            limpiarBufferBarcode();
+        }
+    }, BARCODE_TIMEOUT * 3);
+}
+
+function procesarBufferBarcode() {
+    if (barcodeBuffer.length >= MIN_BARCODE_LENGTH) {
+        console.log('🔫 Código de barras detectado desde lector físico!');
+        console.log('   Longitud:', barcodeBuffer.length);
+        console.log('   Código:', barcodeBuffer);
+        
+        actualizarEstadoDispositivo('scanner', '✅ Código detectado! Procesando...', 'success');
+        if (inputIndicator) inputIndicator.textContent = '✅ Código capturado!';
+        
+        // Procesar el código
+        const codigo = barcodeBuffer;
+        limpiarBufferBarcode();
+        procesarCodigo(codigo);
+    }
+}
+
+function limpiarBufferBarcode() {
+    barcodeBuffer = '';
+    if (barcodeTimeout) {
+        clearTimeout(barcodeTimeout);
+        barcodeTimeout = null;
+    }
+    if (barcodeInput) barcodeInput.value = '';
+    if (inputIndicator) inputIndicator.textContent = '⌨️ Esperando entrada...';
+    actualizarEstadoDispositivo('scanner', 'Esperando escaneo del lector...', 'ready');
+}
 
 // Inicializar el lector de códigos
 function initScanner() {
@@ -265,8 +461,12 @@ function iniciarTemporizadorAutoScan() {
         
         if (segundosRestantes <= 0) {
             clearInterval(autoScanTimeout);
-            // RECARGAR PÁGINA con parámetro para auto-iniciar cámara
-            window.location.href = '/?autostart=1';
+            // RECARGAR PÁGINA manteniendo el modo actual
+            if (modoActual === 'scanner') {
+                window.location.href = '/?modo=scanner';
+            } else {
+                window.location.href = '/?autostart=1';
+            }
         }
     }, 1000);
 }
@@ -282,18 +482,24 @@ function cancelarAutoScan() {
     }
 }
 
-// Escaneo rápido - RECARGA INMEDIATA
+// Escaneo rápido - RECARGA INMEDIATA (respetando modo)
 function escaneoRapido() {
     cancelarAutoScan();
-    // Recargar página inmediatamente con auto-start
-    window.location.href = '/?autostart=1';
+    if (modoActual === 'scanner') {
+        window.location.href = '/?modo=scanner';
+    } else {
+        window.location.href = '/?autostart=1';
+    }
 }
 
-// Nuevo escaneo - RECARGA INMEDIATA
+// Nuevo escaneo - RECARGA INMEDIATA (respetando modo)
 function nuevoEscaneo() {
     cancelarAutoScan();
-    // Recargar página inmediatamente con auto-start
-    window.location.href = '/?autostart=1';
+    if (modoActual === 'scanner') {
+        window.location.href = '/?modo=scanner';
+    } else {
+        window.location.href = '/?autostart=1';
+    }
 }
 
 // Event Listeners
@@ -356,14 +562,74 @@ window.addEventListener('load', () => {
     initScanner();
     console.log('🚀 Aplicación lista para escanear DNIs');
     
-    // AUTO-INICIAR CÁMARA si viene con el parámetro autostart
+    // Detectar tipo de dispositivo
+    const infoDispositivo = detectarTipoDispositivo();
+    
+    // Configurar event listeners para tabs de modo
+    if (modeCameraTab) {
+        modeCameraTab.addEventListener('click', () => cambiarModo('camera'));
+    }
+    if (modeScannerTab) {
+        modeScannerTab.addEventListener('click', () => cambiarModo('scanner'));
+    }
+    
+    // Event listener para el input del código de barras (modo lector físico)
+    if (barcodeInput) {
+        barcodeInput.addEventListener('input', (e) => {
+            // Detectar entrada rápida (característica de lectores)
+            barcodeBuffer = e.target.value;
+            
+            if (barcodeTimeout) clearTimeout(barcodeTimeout);
+            
+            if (barcodeBuffer.length > 0) {
+                actualizarEstadoDispositivo('scanner', `Recibiendo: ${barcodeBuffer.length} caracteres...`, 'active');
+                if (inputIndicator) inputIndicator.textContent = '📥 Recibiendo datos...';
+            }
+            
+            barcodeTimeout = setTimeout(() => {
+                if (barcodeBuffer.length >= MIN_BARCODE_LENGTH) {
+                    procesarBufferBarcode();
+                }
+            }, BARCODE_TIMEOUT * 2);
+        });
+        
+        barcodeInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                barcodeBuffer = barcodeInput.value;
+                procesarBufferBarcode();
+            }
+        });
+        
+        // Mantener foco en el input en modo scanner
+        barcodeInput.addEventListener('blur', () => {
+            if (modoActual === 'scanner') {
+                setTimeout(() => barcodeInput.focus(), 100);
+            }
+        });
+    }
+    
+    // Si es colector, activar modo lector físico automáticamente
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('autostart') === '1') {
-        console.log('⚡ Auto-iniciando cámara...');
-        // Pequeño delay para asegurar que todo esté listo
-        setTimeout(() => {
-            startScanner();
-        }, 300);
+    const forzarModo = urlParams.get('modo'); // ?modo=scanner o ?modo=camera
+    
+    if (forzarModo === 'scanner' || (infoDispositivo.esColector && forzarModo !== 'camera')) {
+        console.log('🔫 Dispositivo colector detectado - Activando modo lector físico');
+        cambiarModo('scanner');
+    } else if (forzarModo === 'camera' || urlParams.get('autostart') === '1') {
+        console.log('📷 Modo cámara seleccionado');
+        cambiarModo('camera');
+        if (urlParams.get('autostart') === '1') {
+            setTimeout(() => startScanner(), 300);
+        }
+    } else {
+        // Por defecto: si tiene cámara, usar cámara; si no, usar lector
+        if (infoDispositivo.tieneCamera) {
+            cambiarModo('camera');
+            actualizarEstadoDispositivo('camera', 'Cámara disponible', 'ready');
+        } else {
+            cambiarModo('scanner');
+        }
     }
 });
 

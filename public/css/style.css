@@ -867,3 +867,567 @@ main {
         max-width: 900px;
     }
 }
+
+/* ===========================================
+   MODO LECTOR FÍSICO (PISTOLA/COLECTOR)
+   =========================================== */
+
+.scan-mode-indicator {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.mode-tabs {
+    display: flex;
+    gap: 8px;
+    background: var(--bg-dark);
+    padding: 4px;
+    border-radius: 12px;
+}
+
+.mode-tab {
+    padding: 10px 20px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.9em;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.mode-tab:hover {
+    color: var(--text-primary);
+    background: var(--bg-elevated);
+}
+
+.mode-tab.active {
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+    color: var(--bg-dark);
+    box-shadow: var(--glow-cyan);
+}
+
+.device-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: var(--bg-elevated);
+    border-radius: 10px;
+    font-size: 0.85em;
+    color: var(--text-secondary);
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--text-secondary);
+    transition: all 0.3s ease;
+}
+
+.status-dot.ready {
+    background: var(--accent-cyan);
+    box-shadow: 0 0 8px var(--accent-cyan);
+    animation: pulse-dot 2s infinite;
+}
+
+.status-dot.active {
+    background: var(--accent-orange);
+    box-shadow: 0 0 8px var(--accent-orange);
+    animation: pulse-dot 0.5s infinite;
+}
+
+.status-dot.success {
+    background: var(--accent-green);
+    box-shadow: 0 0 12px var(--accent-green);
+}
+
+.status-dot.error {
+    background: var(--accent-pink);
+    box-shadow: 0 0 8px var(--accent-pink);
+}
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.9); }
+}
+
+/* Contenedor modo lector físico */
+.scanner-mode-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+    background: var(--bg-card);
+    border-radius: 20px;
+    border: 2px dashed var(--border-color);
+    min-height: 350px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.scanner-mode-container:focus-within {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 30px rgba(0, 245, 255, 0.1);
+}
+
+.scanner-icon {
+    font-size: 4em;
+    margin-bottom: 20px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.scanner-pulse {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 245, 255, 0.2) 0%, transparent 70%);
+    animation: scanner-pulse 2s infinite ease-out;
+}
+
+@keyframes scanner-pulse {
+    0% { transform: scale(0.8); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+.scanner-mode-container h3 {
+    color: var(--text-primary);
+    font-size: 1.4em;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.scanner-instruction {
+    color: var(--text-secondary);
+    font-size: 1em;
+    margin-bottom: 25px;
+}
+
+.scanner-input-wrapper {
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 25px;
+}
+
+.barcode-input {
+    width: 100%;
+    padding: 16px 20px;
+    font-size: 1.1em;
+    font-family: 'Monaco', 'Consolas', monospace;
+    background: var(--bg-dark);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    color: var(--accent-cyan);
+    text-align: center;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.barcode-input:focus {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 20px rgba(0, 245, 255, 0.2);
+}
+
+.barcode-input::placeholder {
+    color: var(--text-secondary);
+    font-size: 0.9em;
+}
+
+.input-indicator {
+    margin-top: 10px;
+    font-size: 0.85em;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+}
+
+.scanner-tips {
+    background: var(--bg-elevated);
+    padding: 16px 20px;
+    border-radius: 12px;
+    text-align: left;
+    max-width: 400px;
+    width: 100%;
+}
+
+.scanner-tips p {
+    color: var(--accent-cyan);
+    margin-bottom: 10px;
+    font-size: 0.9em;
+}
+
+.scanner-tips ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.scanner-tips li {
+    color: var(--text-secondary);
+    font-size: 0.8em;
+    padding: 5px 0;
+    padding-left: 15px;
+    position: relative;
+}
+
+.scanner-tips li::before {
+    content: '•';
+    color: var(--accent-purple);
+    position: absolute;
+    left: 0;
+}
+
+/* Responsive para modo lector */
+@media (max-width: 600px) {
+    .scan-mode-indicator {
+        flex-direction: column;
+        padding: 12px;
+    }
+    
+    .mode-tabs {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .mode-tab {
+        flex: 1;
+        justify-content: center;
+        padding: 12px 16px;
+    }
+    
+    .device-status {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .scanner-mode-container {
+        padding: 30px 15px;
+        min-height: 300px;
+    }
+    
+    .scanner-icon {
+        font-size: 3em;
+    }
+    
+    .scanner-mode-container h3 {
+        font-size: 1.2em;
+    }
+    
+    .barcode-input {
+        font-size: 1em;
+        padding: 14px 16px;
+    }
+}
+
+/* =========================================
+   MODO LECTOR FÍSICO (PISTOLA/COLECTOR)
+   ========================================= */
+
+.scan-mode-indicator {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.mode-tabs {
+    display: flex;
+    gap: 8px;
+    background: var(--bg-dark);
+    padding: 4px;
+    border-radius: 12px;
+}
+
+.mode-tab {
+    padding: 10px 18px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.9em;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.mode-tab:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.mode-tab.active {
+    background: var(--accent-cyan);
+    color: var(--bg-dark);
+    box-shadow: var(--glow-cyan);
+}
+
+.device-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85em;
+    color: var(--text-secondary);
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--text-secondary);
+    transition: all 0.3s ease;
+}
+
+.status-dot.ready {
+    background: var(--accent-cyan);
+    box-shadow: 0 0 10px var(--accent-cyan);
+    animation: pulse-dot 2s infinite;
+}
+
+.status-dot.active {
+    background: var(--accent-orange);
+    box-shadow: 0 0 10px var(--accent-orange);
+    animation: pulse-dot 0.5s infinite;
+}
+
+.status-dot.success {
+    background: var(--accent-green);
+    box-shadow: 0 0 10px var(--accent-green);
+}
+
+.status-dot.error {
+    background: var(--accent-pink);
+    box-shadow: 0 0 10px var(--accent-pink);
+}
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.8); }
+}
+
+/* Contenedor del modo lector físico */
+.scanner-mode-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    background: var(--bg-card);
+    border-radius: 20px;
+    border: 2px dashed var(--border-color);
+    text-align: center;
+    min-height: 300px;
+}
+
+.scanner-icon {
+    font-size: 4em;
+    margin-bottom: 20px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.scanner-pulse {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    border: 3px solid var(--accent-cyan);
+    border-radius: 50%;
+    animation: scanner-pulse 2s ease-out infinite;
+    opacity: 0;
+}
+
+@keyframes scanner-pulse {
+    0% {
+        transform: scale(0.5);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+.scanner-mode-container h3 {
+    font-size: 1.4em;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+}
+
+.scanner-instruction {
+    color: var(--text-secondary);
+    font-size: 1em;
+    margin-bottom: 25px;
+}
+
+.scanner-input-wrapper {
+    width: 100%;
+    max-width: 500px;
+    position: relative;
+    margin-bottom: 25px;
+}
+
+.barcode-input {
+    width: 100%;
+    padding: 16px 20px;
+    font-size: 1.1em;
+    font-family: 'Courier New', monospace;
+    background: var(--bg-dark);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    color: var(--text-primary);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.barcode-input:focus {
+    outline: none;
+    border-color: var(--accent-cyan);
+    box-shadow: var(--glow-cyan);
+}
+
+.barcode-input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.6;
+}
+
+.input-indicator {
+    margin-top: 10px;
+    font-size: 0.85em;
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+}
+
+.scanner-tips {
+    background: var(--bg-elevated);
+    padding: 15px 20px;
+    border-radius: 12px;
+    text-align: left;
+    max-width: 450px;
+    width: 100%;
+}
+
+.scanner-tips p {
+    color: var(--accent-cyan);
+    margin-bottom: 10px;
+    font-size: 0.9em;
+}
+
+.scanner-tips ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.scanner-tips li {
+    color: var(--text-secondary);
+    font-size: 0.85em;
+    padding: 5px 0;
+    padding-left: 15px;
+    position: relative;
+}
+
+.scanner-tips li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--accent-cyan);
+}
+
+/* Animación cuando se detecta código */
+.scanner-mode-container.detecting {
+    border-color: var(--accent-orange);
+    animation: detecting-pulse 0.5s ease infinite;
+}
+
+.scanner-mode-container.success {
+    border-color: var(--accent-green);
+    background: rgba(0, 255, 136, 0.05);
+}
+
+@keyframes detecting-pulse {
+    0%, 100% { border-color: var(--accent-orange); }
+    50% { border-color: var(--accent-cyan); }
+}
+
+/* Responsive para modo lector */
+@media (max-width: 600px) {
+    .scan-mode-indicator {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .mode-tabs {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .mode-tab {
+        flex: 1;
+        justify-content: center;
+        padding: 12px 10px;
+        font-size: 0.85em;
+    }
+    
+    .device-status {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .scanner-mode-container {
+        padding: 30px 15px;
+        min-height: 250px;
+    }
+    
+    .scanner-icon {
+        font-size: 3em;
+    }
+    
+    .scanner-tips {
+        padding: 12px 15px;
+    }
+}
+
+/* Estilo para colectores (pantallas muy pequeñas) */
+@media (max-width: 400px) {
+    .mode-tab {
+        padding: 10px 8px;
+        font-size: 0.8em;
+    }
+    
+    .scanner-mode-container h3 {
+        font-size: 1.2em;
+    }
+    
+    .barcode-input {
+        font-size: 1em;
+        padding: 14px 15px;
+    }
+}

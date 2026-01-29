@@ -38,8 +38,25 @@
         </header>
 
         <main>
+            <!-- Indicador de modo de escaneo -->
+            <div class="scan-mode-indicator" id="scanModeIndicator">
+                <div class="mode-tabs">
+                    <button class="mode-tab active" id="modeCameraTab" data-mode="camera">
+                        📷 Cámara
+                    </button>
+                    <button class="mode-tab" id="modeScannerTab" data-mode="scanner">
+                        🔫 Lector Físico
+                    </button>
+                </div>
+                <div class="device-status" id="deviceStatus">
+                    <span class="status-dot" id="statusDot"></span>
+                    <span id="statusText">Detectando dispositivo...</span>
+                </div>
+            </div>
+
             <!-- Sección de escaneo -->
             <div class="scan-section" id="scanSection">
+                <!-- Modo Cámara -->
                 <div class="camera-container" id="cameraContainer">
                     <video id="video" autoplay playsinline></video>
                     <div class="scan-overlay">
@@ -54,6 +71,30 @@
                     <canvas id="canvas" style="display: none;"></canvas>
                 </div>
 
+                <!-- Modo Lector Físico (Pistola/Colector) -->
+                <div class="scanner-mode-container" id="scannerModeContainer" style="display: none;">
+                    <div class="scanner-icon">
+                        <div class="scanner-pulse"></div>
+                        🔫
+                    </div>
+                    <h3>Modo Lector Físico Activo</h3>
+                    <p class="scanner-instruction">Escanea el código de barras del DNI con tu pistola o colector</p>
+                    <div class="scanner-input-wrapper">
+                        <input type="text" id="barcodeInput" class="barcode-input" 
+                               placeholder="El código aparecerá aquí..." 
+                               autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                        <div class="input-indicator" id="inputIndicator">⌨️ Esperando entrada...</div>
+                    </div>
+                    <div class="scanner-tips">
+                        <p>💡 <strong>Tips:</strong></p>
+                        <ul>
+                            <li>El lector debe estar configurado para enviar ENTER al final</li>
+                            <li>También funciona con pistolas USB conectadas a PC</li>
+                            <li>El escaneo es automático al detectar el código</li>
+                        </ul>
+                    </div>
+                </div>
+
                 <div class="controls">
                     <button id="startBtn" class="btn btn-primary">
                         📷 Iniciar Cámara
@@ -63,7 +104,7 @@
                     </button>
                 </div>
 
-                <div class="instructions">
+                <div class="instructions" id="cameraInstructions">
                     <p>📌 Posiciona el código de barras del DNI dentro del marco</p>
                 </div>
             </div>
