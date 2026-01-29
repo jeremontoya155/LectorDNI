@@ -743,12 +743,15 @@ if (resetCountersBtn) {
 
 // Registrar salida
 if (salidaBtn) {
+    console.log('✅ Botón de salida encontrado, agregando listener');
     salidaBtn.addEventListener('click', async () => {
+        console.log('🚪 Click en botón salida detectado');
         try {
             const response = await fetch('/api/registrar-salida', {
                 method: 'POST'
             });
             const data = await response.json();
+            console.log('📡 Respuesta del servidor:', data);
             if (data.success) {
                 if (contadorSalidas) contadorSalidas.textContent = data.contadorSalidas;
                 if (contadorMayores) contadorMayores.textContent = data.contadorMayores;
@@ -760,6 +763,8 @@ if (salidaBtn) {
             console.error('Error al registrar salida:', error);
         }
     });
+} else {
+    console.error('❌ Botón de salida NO encontrado');
 }
 
 // ===========================================
