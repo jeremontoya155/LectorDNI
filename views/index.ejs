@@ -11,8 +11,19 @@
 </head>
 <body>
     <div class="container">
+        <!-- Alerta de capacidad máxima -->
+        <div class="capacidad-alerta" id="capacidadAlerta" style="display: none;">
+            <div class="alerta-content">
+                <span class="alerta-icon">🚨</span>
+                <span class="alerta-text">¡CAPACIDAD MÁXIMA ALCANZADA!</span>
+                <button class="btn-descargar" id="descargarAlertaBtn">📥 Descargar Datos</button>
+            </div>
+        </div>
+
         <header>
-            <h1>⚡ DNI Scanner</h1>
+            <div class="header-left">
+                <h1>⚡ DNI Scanner</h1>
+            </div>
             <div class="contadores-wrapper">
                 <div class="contador contador-mayores">
                     <span class="contador-numero" id="contadorMayores"><%= contadorMayores %></span>
@@ -30,23 +41,106 @@
                     <span class="contador-numero" id="contadorTotal"><%= contador %></span>
                     <span class="contador-label">Total</span>
                 </div>
+                <div class="contador contador-capacidad" id="contadorCapacidad" style="display: none;">
+                    <span class="contador-numero" id="capacidadActual">0</span>
+                    <span class="contador-label">/ <span id="capacidadMaxima">∞</span></span>
+                </div>
             </div>
             <div class="header-actions">
+                <button id="entradaManualBtn" class="btn-entrada" style="display: none;">🚪 Entrada</button>
                 <button id="salidaBtn" class="btn-salida">🚪 Salida</button>
                 <button id="resetCountersBtn" class="btn-reset">🔄 Reset</button>
+                <button id="menuBtn" class="btn-menu">☰</button>
             </div>
         </header>
 
+        <!-- Menú Hamburguesa de Configuración -->
+        <div class="menu-overlay" id="menuOverlay"></div>
+        <div class="menu-sidebar" id="menuSidebar">
+            <div class="menu-header">
+                <h2>⚙️ Configuración</h2>
+                <button class="menu-close" id="menuClose">✕</button>
+            </div>
+            
+            <div class="menu-content">
+                <!-- Modo de escaneo -->
+                <div class="config-section">
+                    <h3>📱 Modo de Escaneo</h3>
+                    <div class="config-option">
+                        <label class="radio-label">
+                            <input type="radio" name="modoEscaneo" value="camera" id="configModoCamera" checked>
+                            <span class="radio-custom"></span>
+                            <span class="radio-text">📷 Cámara</span>
+                        </label>
+                        <p class="config-desc">Usar la cámara del dispositivo para escanear</p>
+                    </div>
+                    <div class="config-option">
+                        <label class="radio-label">
+                            <input type="radio" name="modoEscaneo" value="scanner" id="configModoScanner">
+                            <span class="radio-custom"></span>
+                            <span class="radio-text">🔫 Lector Físico</span>
+                        </label>
+                        <p class="config-desc">Usar pistola lectora o colector de datos</p>
+                    </div>
+                </div>
+
+                <!-- Capacidad máxima -->
+                <div class="config-section">
+                    <h3>👥 Capacidad Máxima</h3>
+                    <div class="config-option">
+                        <label class="toggle-label">
+                            <input type="checkbox" id="habilitarCapacidad">
+                            <span class="toggle-switch"></span>
+                            <span>Habilitar límite de capacidad</span>
+                        </label>
+                    </div>
+                    <div class="capacidad-input-wrapper" id="capacidadInputWrapper" style="display: none;">
+                        <label>Capacidad máxima de personas:</label>
+                        <input type="number" id="capacidadMaximaInput" min="1" max="99999" value="5000" class="config-input">
+                        <button class="btn-guardar-capacidad" id="guardarCapacidadBtn">💾 Guardar</button>
+                    </div>
+                </div>
+
+                <!-- Ingreso sin DNI -->
+                <div class="config-section">
+                    <h3>🟢 Entrada Manual</h3>
+                    <div class="config-option">
+                        <label class="toggle-label">
+                            <input type="checkbox" id="permitirIngresoSinDni">
+                            <span class="toggle-switch"></span>
+                            <span>Permitir ingreso sin DNI</span>
+                        </label>
+                        <p class="config-desc">Muestra un botón para registrar entradas manualmente sin escanear</p>
+                    </div>
+                </div>
+
+                <!-- Datos y Cache -->
+                <div class="config-section">
+                    <h3>💾 Datos Guardados</h3>
+                    <div class="cache-info">
+                        <p>📊 Escaneos en caché: <strong id="cacheCount">0</strong></p>
+                        <p>📅 Última sesión: <strong id="lastSession">-</strong></p>
+                    </div>
+                    <div class="config-buttons">
+                        <button class="btn-config" id="descargarDatosBtn">📥 Descargar Datos</button>
+                        <button class="btn-config" id="verHistorialBtn">📋 Ver Historial Completo</button>
+                        <button class="btn-config btn-danger" id="limpiarCacheBtn">🗑️ Limpiar Caché</button>
+                    </div>
+                </div>
+
+                <!-- Info -->
+                <div class="config-section config-info">
+                    <p>💡 Los datos se guardan automáticamente en tu dispositivo</p>
+                </div>
+            </div>
+        </div>
+
         <main>
-            <!-- Indicador de modo de escaneo -->
+            <!-- Indicador de modo de escaneo (compacto) -->
             <div class="scan-mode-indicator" id="scanModeIndicator">
-                <div class="mode-tabs">
-                    <button class="mode-tab active" id="modeCameraTab" data-mode="camera">
-                        📷 Cámara
-                    </button>
-                    <button class="mode-tab" id="modeScannerTab" data-mode="scanner">
-                        🔫 Lector Físico
-                    </button>
+                <div class="mode-badge" id="modeBadge">
+                    <span id="modeIcon">📷</span>
+                    <span id="modeText">Cámara</span>
                 </div>
                 <div class="device-status" id="deviceStatus">
                     <span class="status-dot" id="statusDot"></span>
@@ -81,9 +175,10 @@
                     <p class="scanner-instruction">Escanea el código de barras del DNI con tu pistola o colector</p>
                     <div class="scanner-input-wrapper">
                         <input type="text" id="barcodeInput" class="barcode-input" 
-                               placeholder="El código aparecerá aquí..." 
-                               autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-                        <div class="input-indicator" id="inputIndicator">⌨️ Esperando entrada...</div>
+                               placeholder="Esperando escaneo..." 
+                               autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                               inputmode="none" readonly>
+                        <div class="input-indicator" id="inputIndicator">🔫 Listo para escanear</div>
                     </div>
                     <div class="scanner-tips">
                         <p>💡 <strong>Tips:</strong></p>

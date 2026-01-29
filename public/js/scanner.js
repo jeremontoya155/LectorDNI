@@ -14,6 +14,193 @@ let barcodeTimeout = null;
 const BARCODE_TIMEOUT = 100; // ms - tiempo máximo entre caracteres de un código
 const MIN_BARCODE_LENGTH = 20; // Longitud mínima del código de barras del DNI
 
+// ===========================================
+// CONFIGURACIÓN Y LOCALSTORAGE
+// ===========================================
+const CONFIG_KEY = 'dniScanner_config';
+const HISTORIAL_KEY = 'dniScanner_historial';
+const SESSION_KEY = 'dniScanner_session';
+
+let config = {
+    modoEscaneo: 'camera',
+    habilitarCapacidad: false,
+    capacidadMaxima: 5000,
+    permitirIngresoSinDni: false
+};
+
+let historialLocal = [];
+
+// Cargar configuración desde localStorage
+function cargarConfiguracion() {
+    try {
+        const savedConfig = localStorage.getItem(CONFIG_KEY);
+        if (savedConfig) {
+            config = { ...config, ...JSON.parse(savedConfig) };
+        }
+        
+        const savedHistorial = localStorage.getItem(HISTORIAL_KEY);
+        if (savedHistorial) {
+            historialLocal = JSON.parse(savedHistorial);
+        }
+        
+        console.log('📂 Configuración cargada:', config);
+        console.log('📊 Historial cargado:', historialLocal.length, 'registros');
+    } catch (error) {
+        console.error('Error cargando configuración:', error);
+    }
+}
+
+// Guardar configuración en localStorage
+function guardarConfiguracion() {
+    try {
+        localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+        localStorage.setItem(SESSION_KEY, new Date().toISOString());
+        console.log('💾 Configuración guardada');
+    } catch (error) {
+        console.error('Error guardando configuración:', error);
+    }
+}
+
+// Guardar historial en localStorage
+function guardarHistorial() {
+    try {
+        localStorage.setItem(HISTORIAL_KEY, JSON.stringify(historialLocal));
+        localStorage.setItem(SESSION_KEY, new Date().toISOString());
+        actualizarInfoCache();
+    } catch (error) {
+        console.error('Error guardando historial:', error);
+        // Si localStorage está lleno, intentar limpiarlo parcialmente
+        if (error.name === 'QuotaExceededError') {
+            alert('⚠️ Almacenamiento lleno. Descargá los datos y limpiá el caché.');
+        }
+    }
+}
+
+// Agregar escaneo al historial local
+function agregarAHistorialLocal(datos) {
+    const registro = {
+        ...datos,
+        timestamp: new Date().toISOString(),
+        fecha: new Date().toLocaleDateString('es-AR'),
+        hora: new Date().toLocaleTimeString('es-AR')
+    };
+    
+    historialLocal.push(registro);
+    guardarHistorial();
+    verificarCapacidad();
+}
+
+// Verificar capacidad máxima
+function verificarCapacidad() {
+    const contadorActualElem = document.getElementById('capacidadActual');
+    const alertaElem = document.getElementById('capacidadAlerta');
+    const contadorCapacidadElem = document.getElementById('contadorCapacidad');
+    
+    if (config.habilitarCapacidad) {
+        const actual = parseInt(contadorMayores?.textContent || '0');
+        
+        if (contadorActualElem) contadorActualElem.textContent = actual;
+        if (contadorCapacidadElem) contadorCapacidadElem.style.display = 'flex';
+        
+        if (actual >= config.capacidadMaxima) {
+            // Mostrar alerta de capacidad máxima
+            if (alertaElem) {
+                alertaElem.style.display = 'block';
+                alertaElem.classList.add('pulse');
+            }
+            document.body.classList.add('capacidad-maxima');
+            console.log('🚨 ¡CAPACIDAD MÁXIMA ALCANZADA!');
+        } else {
+            if (alertaElem) alertaElem.style.display = 'none';
+            document.body.classList.remove('capacidad-maxima');
+        }
+    } else {
+        if (contadorCapacidadElem) contadorCapacidadElem.style.display = 'none';
+        if (alertaElem) alertaElem.style.display = 'none';
+    }
+}
+
+// Descargar datos como CSV
+function descargarDatos() {
+    if (historialLocal.length === 0) {
+        alert('No hay datos para descargar');
+        return;
+    }
+    
+    // Crear CSV
+    const headers = ['Fecha', 'Hora', 'Nombre', 'Apellido', 'DNI', 'Edad', 'Sexo', 'Mayor de Edad', 'CUIL', 'Fecha Nacimiento', 'Vencimiento DNI'];
+    const rows = historialLocal.map(item => [
+        item.fecha || '',
+        item.hora || '',
+        item.nombre || '',
+        item.apellido || '',
+        item.dni || '',
+        item.edad || '',
+        item.sexo || '',
+        item.esMayorDeEdad ? 'SI' : 'NO',
+        item.cuil || '',
+        item.fechaNacimiento || '',
+        item.fechaVencimiento || ''
+    ]);
+    
+    const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+    
+    // Agregar BOM para UTF-8 en Excel
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    
+    const fecha = new Date().toISOString().split('T')[0];
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `escaneos_dni_${fecha}.csv`;
+    link.click();
+    
+    URL.revokeObjectURL(url);
+    console.log('📥 Datos descargados:', historialLocal.length, 'registros');
+}
+
+// Actualizar info del caché en el menú
+function actualizarInfoCache() {
+    const cacheCountElem = document.getElementById('cacheCount');
+    const lastSessionElem = document.getElementById('lastSession');
+    const capacidadMaximaElem = document.getElementById('capacidadMaxima');
+    
+    if (cacheCountElem) cacheCountElem.textContent = historialLocal.length;
+    
+    if (lastSessionElem) {
+        const lastSession = localStorage.getItem(SESSION_KEY);
+        if (lastSession) {
+            const fecha = new Date(lastSession);
+            lastSessionElem.textContent = fecha.toLocaleString('es-AR');
+        } else {
+            lastSessionElem.textContent = 'Primera sesión';
+        }
+    }
+    
+    if (capacidadMaximaElem) {
+        capacidadMaximaElem.textContent = config.habilitarCapacidad ? config.capacidadMaxima : '∞';
+    }
+}
+
+// Limpiar caché
+function limpiarCache() {
+    if (confirm('⚠️ ¿Estás seguro? Se borrarán todos los escaneos guardados.\n\n¿Deseas descargar los datos primero?')) {
+        const descargar = confirm('¿Descargar datos antes de borrar?');
+        if (descargar) {
+            descargarDatos();
+        }
+        
+        historialLocal = [];
+        localStorage.removeItem(HISTORIAL_KEY);
+        actualizarInfoCache();
+        alert('✅ Caché limpiado correctamente');
+    }
+}
+
 // Elementos del DOM
 const video = document.getElementById('video');
 const startBtn = document.getElementById('startBtn');
@@ -87,14 +274,24 @@ function detectarTipoDispositivo() {
 // ===========================================
 function cambiarModo(modo) {
     modoActual = modo;
+    config.modoEscaneo = modo;
+    guardarConfiguracion();
     
-    // Actualizar tabs
-    document.querySelectorAll('.mode-tab').forEach(tab => {
-        tab.classList.remove('active');
-    });
-    document.querySelector(`[data-mode="${modo}"]`)?.classList.add('active');
+    // Actualizar badge de modo
+    const modeIcon = document.getElementById('modeIcon');
+    const modeText = document.getElementById('modeText');
+    const modeBadge = document.getElementById('modeBadge');
+    
+    // Actualizar radios en el menú
+    const configModoCamera = document.getElementById('configModoCamera');
+    const configModoScanner = document.getElementById('configModoScanner');
     
     if (modo === 'camera') {
+        if (modeIcon) modeIcon.textContent = '📷';
+        if (modeText) modeText.textContent = 'Cámara';
+        if (modeBadge) modeBadge.className = 'mode-badge mode-camera';
+        if (configModoCamera) configModoCamera.checked = true;
+        
         // Modo cámara
         if (cameraContainer) cameraContainer.style.display = 'block';
         if (scannerModeContainer) scannerModeContainer.style.display = 'none';
@@ -107,6 +304,11 @@ function cambiarModo(modo) {
         actualizarEstadoDispositivo('camera', 'Modo cámara activo');
         
     } else if (modo === 'scanner') {
+        if (modeIcon) modeIcon.textContent = '🔫';
+        if (modeText) modeText.textContent = 'Lector';
+        if (modeBadge) modeBadge.className = 'mode-badge mode-scanner';
+        if (configModoScanner) configModoScanner.checked = true;
+        
         // Modo lector físico
         stopScanner(); // Detener cámara si está activa
         
@@ -387,8 +589,11 @@ function mostrarResultado(data) {
     scanSection.style.display = 'none';
     resultSection.style.display = 'block';
 
-    // Agregar al historial en el frontend
+    // Agregar al historial visual
     agregarAlHistorial(datos);
+    
+    // 💾 GUARDAR EN LOCALSTORAGE
+    agregarAHistorialLocal(datos);
 
     // Iniciar temporizador automático - RECARGA LA PÁGINA con auto-start
     iniciarTemporizadorAutoScan();
@@ -557,21 +762,218 @@ if (salidaBtn) {
     });
 }
 
+// ===========================================
+// MENÚ HAMBURGUESA
+// ===========================================
+function inicializarMenu() {
+    const menuBtn = document.getElementById('menuBtn');
+    const menuOverlay = document.getElementById('menuOverlay');
+    const menuSidebar = document.getElementById('menuSidebar');
+    const menuClose = document.getElementById('menuClose');
+    
+    // Abrir menú
+    if (menuBtn) {
+        menuBtn.addEventListener('click', () => {
+            menuSidebar?.classList.add('open');
+            menuOverlay?.classList.add('open');
+            actualizarInfoCache();
+        });
+    }
+    
+    // Cerrar menú
+    function cerrarMenu() {
+        menuSidebar?.classList.remove('open');
+        menuOverlay?.classList.remove('open');
+    }
+    
+    if (menuClose) menuClose.addEventListener('click', cerrarMenu);
+    if (menuOverlay) menuOverlay.addEventListener('click', cerrarMenu);
+    
+    // Cambio de modo desde el menú
+    const configModoCamera = document.getElementById('configModoCamera');
+    const configModoScanner = document.getElementById('configModoScanner');
+    
+    if (configModoCamera) {
+        configModoCamera.addEventListener('change', () => {
+            if (configModoCamera.checked) cambiarModo('camera');
+        });
+    }
+    if (configModoScanner) {
+        configModoScanner.addEventListener('change', () => {
+            if (configModoScanner.checked) cambiarModo('scanner');
+        });
+    }
+    
+    // Habilitar/deshabilitar capacidad
+    const habilitarCapacidad = document.getElementById('habilitarCapacidad');
+    const capacidadInputWrapper = document.getElementById('capacidadInputWrapper');
+    
+    if (habilitarCapacidad) {
+        habilitarCapacidad.checked = config.habilitarCapacidad;
+        if (capacidadInputWrapper) {
+            capacidadInputWrapper.style.display = config.habilitarCapacidad ? 'block' : 'none';
+        }
+        
+        habilitarCapacidad.addEventListener('change', () => {
+            config.habilitarCapacidad = habilitarCapacidad.checked;
+            if (capacidadInputWrapper) {
+                capacidadInputWrapper.style.display = habilitarCapacidad.checked ? 'block' : 'none';
+            }
+            guardarConfiguracion();
+            verificarCapacidad();
+        });
+    }
+    
+    // Input de capacidad máxima
+    const capacidadMaximaInput = document.getElementById('capacidadMaximaInput');
+    const guardarCapacidadBtn = document.getElementById('guardarCapacidadBtn');
+    
+    if (capacidadMaximaInput) {
+        capacidadMaximaInput.value = config.capacidadMaxima;
+    }
+    
+    if (guardarCapacidadBtn) {
+        guardarCapacidadBtn.addEventListener('click', () => {
+            const valor = parseInt(capacidadMaximaInput?.value || '5000');
+            if (valor > 0) {
+                config.capacidadMaxima = valor;
+                guardarConfiguracion();
+                verificarCapacidad();
+                
+                const capacidadMaximaElem = document.getElementById('capacidadMaxima');
+                if (capacidadMaximaElem) capacidadMaximaElem.textContent = valor;
+                
+                alert(`✅ Capacidad máxima establecida en ${valor} personas`);
+            }
+        });
+    }
+    
+    // Permitir ingreso sin DNI
+    const permitirIngresoSinDni = document.getElementById('permitirIngresoSinDni');
+    const entradaManualBtn = document.getElementById('entradaManualBtn');
+    
+    if (permitirIngresoSinDni) {
+        permitirIngresoSinDni.checked = config.permitirIngresoSinDni;
+        if (entradaManualBtn) {
+            entradaManualBtn.style.display = config.permitirIngresoSinDni ? 'inline-flex' : 'none';
+        }
+        
+        permitirIngresoSinDni.addEventListener('change', () => {
+            config.permitirIngresoSinDni = permitirIngresoSinDni.checked;
+            guardarConfiguracion();
+            if (entradaManualBtn) {
+                entradaManualBtn.style.display = permitirIngresoSinDni.checked ? 'inline-flex' : 'none';
+            }
+        });
+    }
+    
+    // Botón de entrada manual
+    if (entradaManualBtn) {
+        entradaManualBtn.addEventListener('click', registrarEntradaManual);
+    }
+    
+    // Botones de datos
+    const descargarDatosBtn = document.getElementById('descargarDatosBtn');
+    const descargarAlertaBtn = document.getElementById('descargarAlertaBtn');
+    const limpiarCacheBtn = document.getElementById('limpiarCacheBtn');
+    const verHistorialBtn = document.getElementById('verHistorialBtn');
+    
+    if (descargarDatosBtn) descargarDatosBtn.addEventListener('click', descargarDatos);
+    if (descargarAlertaBtn) descargarAlertaBtn.addEventListener('click', descargarDatos);
+    if (limpiarCacheBtn) limpiarCacheBtn.addEventListener('click', limpiarCache);
+    
+    if (verHistorialBtn) {
+        verHistorialBtn.addEventListener('click', () => {
+            if (historialLocal.length === 0) {
+                alert('No hay escaneos en el historial');
+                return;
+            }
+            
+            let resumen = `📊 HISTORIAL COMPLETO (${historialLocal.length} registros)\n\n`;
+            resumen += historialLocal.slice(-20).reverse().map((item, i) => 
+                `${i+1}. ${item.nombreCompleto || item.nombre + ' ' + item.apellido} - DNI: ${item.dni} - ${item.edad} años - ${item.fecha} ${item.hora}`
+            ).join('\n');
+            
+            if (historialLocal.length > 20) {
+                resumen += `\n\n... y ${historialLocal.length - 20} registros más.\nDescargá el CSV para ver todo.`;
+            }
+            
+            alert(resumen);
+        });
+    }
+}
+
+// Registrar entrada manual (sin DNI)
+async function registrarEntradaManual() {
+    try {
+        const response = await fetch('/api/registrar-entrada-manual', {
+            method: 'POST'
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            // Actualizar contadores en pantalla
+            if (contadorTotal) contadorTotal.textContent = data.contador;
+            if (contadorMayores) contadorMayores.textContent = data.contadorMayores;
+            
+            // Guardar en historial local
+            agregarAHistorialLocal({
+                nombreCompleto: 'Entrada Manual',
+                nombre: 'Entrada',
+                apellido: 'Manual',
+                dni: 'SIN DNI',
+                edad: '-',
+                esMayorDeEdad: true,
+                tipo: 'MANUAL'
+            });
+            
+            // Verificar capacidad
+            verificarCapacidad();
+            
+            // Feedback visual
+            const entradaManualBtn = document.getElementById('entradaManualBtn');
+            if (entradaManualBtn) {
+                entradaManualBtn.style.transform = 'scale(0.95)';
+                entradaManualBtn.style.background = 'var(--accent-green)';
+                setTimeout(() => {
+                    entradaManualBtn.style.transform = '';
+                    entradaManualBtn.style.background = '';
+                }, 200);
+            }
+            
+            console.log('🟢 Entrada manual registrada');
+        }
+    } catch (error) {
+        console.error('Error al registrar entrada manual:', error);
+        alert('Error al registrar entrada');
+    }
+}
+
 // Inicializar al cargar la página
 window.addEventListener('load', () => {
+    // Cargar configuración desde localStorage PRIMERO
+    cargarConfiguracion();
+    
     initScanner();
     console.log('🚀 Aplicación lista para escanear DNIs');
     
+    // Inicializar menú hamburguesa
+    inicializarMenu();
+    
+    // Actualizar info del caché
+    actualizarInfoCache();
+    
+    // Verificar capacidad al cargar
+    verificarCapacidad();
+    
+    // Mostrar/ocultar botón entrada manual según config
+    const entradaManualBtn = document.getElementById('entradaManualBtn');
+    if (entradaManualBtn) {
+        entradaManualBtn.style.display = config.permitirIngresoSinDni ? 'inline-flex' : 'none';
+    }
+    
     // Detectar tipo de dispositivo
     const infoDispositivo = detectarTipoDispositivo();
-    
-    // Configurar event listeners para tabs de modo
-    if (modeCameraTab) {
-        modeCameraTab.addEventListener('click', () => cambiarModo('camera'));
-    }
-    if (modeScannerTab) {
-        modeScannerTab.addEventListener('click', () => cambiarModo('scanner'));
-    }
     
     // Event listener para el input del código de barras (modo lector físico)
     if (barcodeInput) {
@@ -609,27 +1011,31 @@ window.addEventListener('load', () => {
         });
     }
     
-    // Si es colector, activar modo lector físico automáticamente
+    // Determinar modo inicial
     const urlParams = new URLSearchParams(window.location.search);
-    const forzarModo = urlParams.get('modo'); // ?modo=scanner o ?modo=camera
+    const forzarModo = urlParams.get('modo');
     
-    if (forzarModo === 'scanner' || (infoDispositivo.esColector && forzarModo !== 'camera')) {
-        console.log('🔫 Dispositivo colector detectado - Activando modo lector físico');
+    // Prioridad: URL > config guardada > detección automática
+    if (forzarModo === 'scanner') {
         cambiarModo('scanner');
     } else if (forzarModo === 'camera' || urlParams.get('autostart') === '1') {
-        console.log('📷 Modo cámara seleccionado');
         cambiarModo('camera');
         if (urlParams.get('autostart') === '1') {
             setTimeout(() => startScanner(), 300);
         }
-    } else {
-        // Por defecto: si tiene cámara, usar cámara; si no, usar lector
-        if (infoDispositivo.tieneCamera) {
-            cambiarModo('camera');
+    } else if (config.modoEscaneo) {
+        // Usar modo guardado en config
+        cambiarModo(config.modoEscaneo);
+        if (config.modoEscaneo === 'camera' && infoDispositivo.tieneCamera) {
             actualizarEstadoDispositivo('camera', 'Cámara disponible', 'ready');
-        } else {
-            cambiarModo('scanner');
         }
+    } else if (infoDispositivo.esColector) {
+        cambiarModo('scanner');
+    } else if (infoDispositivo.tieneCamera) {
+        cambiarModo('camera');
+        actualizarEstadoDispositivo('camera', 'Cámara disponible', 'ready');
+    } else {
+        cambiarModo('scanner');
     }
 });
 

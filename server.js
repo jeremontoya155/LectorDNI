@@ -224,6 +224,38 @@ app.post('/api/registrar-salida', (req, res) => {
     });
 });
 
+// Endpoint para registrar entrada manual (sin DNI)
+app.post('/api/registrar-entrada-manual', (req, res) => {
+    contadorEscaneos++;
+    contadorMayores++;
+    
+    const registro = {
+        timestamp: new Date().toLocaleString('es-AR'),
+        contador: contadorEscaneos,
+        tipo: 'ENTRADA_MANUAL',
+        nombre: 'Entrada',
+        apellido: 'Manual',
+        dni: 'SIN DNI',
+        edad: '-',
+        esMayorDeEdad: true
+    };
+    
+    historialEscaneos.push(registro);
+    
+    console.log('\n🟢 ENTRADA MANUAL REGISTRADA');
+    console.log(`Entradas actuales: ${contadorMayores}`);
+    console.log(`Total escaneos: ${contadorEscaneos}`);
+    console.log('=================================\n');
+    
+    res.json({
+        success: true,
+        contador: contadorEscaneos,
+        contadorMayores: contadorMayores,
+        contadorMenores: contadorMenores,
+        contadorSalidas: contadorSalidas
+    });
+});
+
 // Endpoint para reiniciar contadores
 app.post('/api/reiniciar-contadores', (req, res) => {
     contadorEscaneos = 0;

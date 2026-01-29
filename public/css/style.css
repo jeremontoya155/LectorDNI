@@ -160,6 +160,27 @@ header h1 {
     box-shadow: var(--glow-pink);
 }
 
+.btn-entrada {
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 255, 136, 0.1));
+    color: var(--accent-green);
+    border: 1px solid rgba(0, 255, 136, 0.4);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 0.9em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-entrada:hover {
+    background: rgba(0, 255, 136, 0.25);
+    box-shadow: var(--glow-green);
+}
+
+.btn-entrada:active {
+    transform: scale(0.95);
+}
+
 /* Switch para opción de menores */
 .config-menores {
     margin-top: 12px;
@@ -1429,5 +1450,496 @@ main {
     .barcode-input {
         font-size: 1em;
         padding: 14px 15px;
+    }
+}
+
+/* ===========================================
+   MENÚ HAMBURGUESA
+   =========================================== */
+
+.btn-menu {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-size: 1.5em;
+    padding: 8px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    line-height: 1;
+}
+
+.btn-menu:hover {
+    background: var(--accent-cyan);
+    color: var(--bg-dark);
+    border-color: var(--accent-cyan);
+}
+
+.menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 998;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.menu-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.menu-sidebar {
+    position: fixed;
+    top: 0;
+    right: -350px;
+    width: 350px;
+    max-width: 90vw;
+    height: 100vh;
+    background: var(--bg-card);
+    border-left: 1px solid var(--border-color);
+    z-index: 999;
+    transition: right 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.menu-sidebar.open {
+    right: 0;
+}
+
+.menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-elevated);
+}
+
+.menu-header h2 {
+    font-size: 1.2em;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.menu-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.5em;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.menu-close:hover {
+    color: var(--accent-pink);
+    background: rgba(255, 0, 128, 0.1);
+}
+
+.menu-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.config-section {
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.config-section:last-child {
+    border-bottom: none;
+}
+
+.config-section h3 {
+    font-size: 1em;
+    color: var(--accent-cyan);
+    margin-bottom: 15px;
+}
+
+.config-option {
+    margin-bottom: 12px;
+}
+
+.config-desc {
+    font-size: 0.8em;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    margin-left: 28px;
+}
+
+/* Radio buttons personalizados */
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 10px;
+    transition: background 0.2s ease;
+}
+
+.radio-label:hover {
+    background: var(--bg-elevated);
+}
+
+.radio-label input[type="radio"] {
+    display: none;
+}
+
+.radio-custom {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border-color);
+    border-radius: 50%;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.radio-label input[type="radio"]:checked + .radio-custom {
+    border-color: var(--accent-cyan);
+}
+
+.radio-label input[type="radio"]:checked + .radio-custom::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    background: var(--accent-cyan);
+    border-radius: 50%;
+}
+
+.radio-text {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* Toggle switch */
+.toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    color: var(--text-primary);
+}
+
+.toggle-label input[type="checkbox"] {
+    display: none;
+}
+
+.toggle-switch {
+    width: 50px;
+    height: 26px;
+    background: var(--bg-dark);
+    border: 2px solid var(--border-color);
+    border-radius: 13px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    background: var(--text-secondary);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.toggle-label input[type="checkbox"]:checked + .toggle-switch {
+    background: var(--accent-cyan);
+    border-color: var(--accent-cyan);
+}
+
+.toggle-label input[type="checkbox"]:checked + .toggle-switch::after {
+    left: 26px;
+    background: var(--bg-dark);
+}
+
+/* Input de capacidad */
+.capacidad-input-wrapper {
+    margin-top: 15px;
+    padding: 15px;
+    background: var(--bg-elevated);
+    border-radius: 12px;
+}
+
+.capacidad-input-wrapper label {
+    display: block;
+    font-size: 0.85em;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.config-input {
+    width: 100%;
+    padding: 12px 15px;
+    background: var(--bg-dark);
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-size: 1.1em;
+    text-align: center;
+    margin-bottom: 10px;
+    transition: all 0.2s ease;
+}
+
+.config-input:focus {
+    outline: none;
+    border-color: var(--accent-cyan);
+}
+
+.btn-guardar-capacidad {
+    width: 100%;
+    padding: 10px;
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+    border: none;
+    border-radius: 10px;
+    color: var(--bg-dark);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-guardar-capacidad:hover {
+    transform: scale(1.02);
+    box-shadow: var(--glow-cyan);
+}
+
+/* Info del caché */
+.cache-info {
+    background: var(--bg-elevated);
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+}
+
+.cache-info p {
+    color: var(--text-secondary);
+    font-size: 0.9em;
+    margin-bottom: 8px;
+}
+
+.cache-info p:last-child {
+    margin-bottom: 0;
+}
+
+.cache-info strong {
+    color: var(--accent-cyan);
+}
+
+/* Botones de configuración */
+.config-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.btn-config {
+    padding: 12px 15px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.btn-config:hover {
+    background: var(--bg-dark);
+    border-color: var(--accent-cyan);
+}
+
+.btn-config.btn-danger {
+    border-color: rgba(255, 0, 128, 0.3);
+    color: var(--accent-pink);
+}
+
+.btn-config.btn-danger:hover {
+    background: rgba(255, 0, 128, 0.1);
+    border-color: var(--accent-pink);
+}
+
+.config-info {
+    background: rgba(0, 245, 255, 0.05);
+    border-radius: 12px;
+    padding: 15px;
+}
+
+.config-info p {
+    color: var(--text-secondary);
+    font-size: 0.85em;
+    margin: 0;
+}
+
+/* ===========================================
+   ALERTA DE CAPACIDAD MÁXIMA
+   =========================================== */
+
+.capacidad-alerta {
+    background: linear-gradient(135deg, rgba(255, 0, 128, 0.2), rgba(255, 50, 50, 0.2));
+    border: 2px solid var(--accent-pink);
+    border-radius: 16px;
+    padding: 15px 20px;
+    margin-bottom: 16px;
+    animation: alertaPulse 1s infinite;
+}
+
+@keyframes alertaPulse {
+    0%, 100% { 
+        box-shadow: 0 0 20px rgba(255, 0, 128, 0.3);
+        transform: scale(1);
+    }
+    50% { 
+        box-shadow: 0 0 40px rgba(255, 0, 128, 0.5);
+        transform: scale(1.01);
+    }
+}
+
+.alerta-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.alerta-icon {
+    font-size: 2em;
+    animation: shake 0.5s infinite;
+}
+
+@keyframes shake {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-10deg); }
+    75% { transform: rotate(10deg); }
+}
+
+.alerta-text {
+    font-size: 1.2em;
+    font-weight: 700;
+    color: var(--accent-pink);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-descargar {
+    padding: 10px 20px;
+    background: var(--accent-pink);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-descargar:hover {
+    transform: scale(1.05);
+    box-shadow: var(--glow-pink);
+}
+
+/* Contador de capacidad */
+.contador-capacidad {
+    background: rgba(255, 149, 0, 0.15);
+    border-color: rgba(255, 149, 0, 0.3);
+    color: var(--accent-orange);
+}
+
+body.capacidad-maxima .contador-capacidad {
+    background: rgba(255, 0, 128, 0.2);
+    border-color: var(--accent-pink);
+    color: var(--accent-pink);
+    animation: capacidadMaximaPulse 1s infinite;
+}
+
+@keyframes capacidadMaximaPulse {
+    0%, 100% { box-shadow: 0 0 10px rgba(255, 0, 128, 0.3); }
+    50% { box-shadow: 0 0 20px rgba(255, 0, 128, 0.6); }
+}
+
+/* ===========================================
+   BADGE DE MODO COMPACTO
+   =========================================== */
+
+.mode-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--bg-elevated);
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.mode-badge.mode-camera {
+    background: rgba(0, 245, 255, 0.15);
+    color: var(--accent-cyan);
+    border: 1px solid rgba(0, 245, 255, 0.3);
+}
+
+.mode-badge.mode-scanner {
+    background: rgba(139, 92, 246, 0.15);
+    color: var(--accent-purple);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+/* Ocultar tabs viejos si existen */
+.mode-tabs {
+    display: none;
+}
+
+/* ===========================================
+   RESPONSIVE PARA MENÚ
+   =========================================== */
+
+@media (max-width: 600px) {
+    .menu-sidebar {
+        width: 100%;
+        right: -100%;
+    }
+    
+    .alerta-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .alerta-text {
+        font-size: 1em;
+    }
+    
+    .btn-menu {
+        padding: 6px 10px;
+        font-size: 1.3em;
+    }
+}
+
+@media (max-width: 400px) {
+    .menu-content {
+        padding: 15px;
+    }
+    
+    .config-section h3 {
+        font-size: 0.95em;
     }
 }
