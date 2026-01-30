@@ -851,12 +851,21 @@ if (salidaBtn) {
     salidaBtn.addEventListener('click', async () => {
         console.log('🚪 Click en botón salida detectado');
         
+        // Verificar que haya personas adentro para registrar salida
+        if (contadoresLocales.mayores <= 0) {
+            alert('⚠️ No hay personas adentro para registrar una salida');
+            return;
+        }
+        
         // Incrementar contador de salidas
         contadoresLocales.salidas++;
         
-        // Restar de mayores si es posible
-        if (contadoresLocales.mayores > 0) {
-            contadoresLocales.mayores--;
+        // Restar de mayores (ya verificamos que es > 0)
+        contadoresLocales.mayores--;
+        
+        // IMPORTANTE: También restar del total
+        if (contadoresLocales.total > 0) {
+            contadoresLocales.total--;
         }
         
         // Guardar y actualizar UI
