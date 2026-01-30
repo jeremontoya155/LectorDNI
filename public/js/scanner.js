@@ -670,7 +670,10 @@ function stopScanner() {
         video.srcObject = null;
     }
 
-    startBtn.style.display = 'inline-flex';
+    // Solo mostrar botón iniciar si estamos en modo cámara
+    if (modoActual === 'camera') {
+        startBtn.style.display = 'inline-flex';
+    }
     stopBtn.style.display = 'none';
 }
 
