@@ -24,28 +24,7 @@
             <div class="header-left">
                 <h1>⚡ DNI Scanner</h1>
             </div>
-            <div class="contadores-wrapper">
-                <div class="contador contador-mayores">
-                    <span class="contador-numero" id="contadorMayores"><%= contadorMayores %></span>
-                    <span class="contador-label">Dentro</span>
-                </div>
-                <div class="contador contador-salidas">
-                    <span class="contador-numero" id="contadorSalidas"><%= contadorSalidas %></span>
-                    <span class="contador-label">Salidas</span>
-                </div>
-                <div class="contador contador-menores">
-                    <span class="contador-numero" id="contadorMenores"><%= contadorMenores %></span>
-                    <span class="contador-label">Menores</span>
-                </div>
-                <div class="contador contador-total">
-                    <span class="contador-numero" id="contadorTotal"><%= contador %></span>
-                    <span class="contador-label">Total</span>
-                </div>
-                <div class="contador contador-capacidad" id="contadorCapacidad" style="display: none;">
-                    <span class="contador-numero" id="capacidadActual">0</span>
-                    <span class="contador-label">/ <span id="capacidadMaxima">∞</span></span>
-                </div>
-            </div>
+
             <div class="header-actions">
                 <button id="entradaManualBtn" class="btn-entrada" style="display: none;">🚪 Entrada</button>
                 <button id="salidaBtn" class="btn-salida">🚪 Salida</button>
@@ -167,28 +146,38 @@
 
                 <!-- Modo Lector Físico (Pistola/Colector) -->
                 <div class="scanner-mode-container" id="scannerModeContainer" style="display: none;">
-                    <div class="scanner-icon">
-                        <div class="scanner-pulse"></div>
-                        🔫
-                    </div>
-                    <h3>Modo Lector Físico Activo</h3>
-                    <p class="scanner-instruction">Escanea el código de barras del DNI con tu pistola o colector</p>
+                 
                     <div class="scanner-input-wrapper">
                         <input type="text" id="barcodeInput" class="barcode-input" 
                                placeholder="El código aparecerá aquí..." 
                                autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
                         <div class="input-indicator" id="inputIndicator">⌨️ Esperando entrada...</div>
                     </div>
-                    <div class="scanner-tips">
-                        <p>💡 <strong>Tips:</strong></p>
-                        <ul>
-                            <li>El lector debe estar configurado para enviar ENTER al final</li>
-                            <li>También funciona con pistolas USB conectadas a PC</li>
-                            <li>El escaneo es automático al detectar el código</li>
-                        </ul>
-                    </div>
+                 
                 </div>
 
+                            <div class="contadores-wrapper">
+                <div class="contador contador-mayores">
+                    <span class="contador-numero" id="contadorMayores"><%= contadorMayores %></span>
+                    <span class="contador-label">Dentro</span>
+                </div>
+                <div class="contador contador-salidas">
+                    <span class="contador-numero" id="contadorSalidas"><%= contadorSalidas %></span>
+                    <span class="contador-label">Salidas</span>
+                </div>
+                <div class="contador contador-menores">
+                    <span class="contador-numero" id="contadorMenores"><%= contadorMenores %></span>
+                    <span class="contador-label">Menores</span>
+                </div>
+                <div class="contador contador-total">
+                    <span class="contador-numero" id="contadorTotal"><%= contador %></span>
+                    <span class="contador-label">Total</span>
+                </div>
+                <div class="contador contador-capacidad" id="contadorCapacidad" style="display: none;">
+                    <span class="contador-numero" id="capacidadActual">0</span>
+                    <span class="contador-label">/ <span id="capacidadMaxima">∞</span></span>
+                </div>
+            </div>
                 <div class="controls">
                     <button id="startBtn" class="btn btn-primary">
                         📷 Iniciar Cámara
