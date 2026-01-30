@@ -53,6 +53,24 @@ header {
     width: 100%;
 }
 
+/* Header simple - solo título arriba */
+.header-simple {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    margin-bottom: 12px;
+    width: 100%;
+}
+
+.header-simple h1 {
+    color: var(--text-primary);
+    font-size: 1.5em;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
 header h1 {
     color: var(--text-primary);
     font-size: 1.4em;
@@ -66,6 +84,8 @@ header h1 {
     gap: 8px;
     align-items: center;
     flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 12px;
 }
 
 .contador {
@@ -141,6 +161,19 @@ header h1 {
     gap: 8px;
     flex-wrap: wrap;
     justify-content: center;
+}
+
+/* Botones de acción debajo del escáner */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 16px;
+    padding: 12px;
+    background: var(--bg-card);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
 }
 
 .btn-salida {
@@ -256,7 +289,7 @@ main {
 
 .camera-container {
     position: relative;
-    max-width: 500px;
+    max-width: 600px;
     margin: 0 auto 20px;
     background: #000;
     border-radius: 16px;

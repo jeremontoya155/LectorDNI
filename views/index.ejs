@@ -22,18 +22,10 @@
             </div>
         </div>
 
-        <header>
-            <div class="header-left">
-                <h1>⚡ DNI Scanner</h1>
-            </div>
-
-            <div class="header-actions">
-                <button id="salidaBtn" class="btn-salida">🚪 Salida</button>
-                <button id="entradaManualBtn" class="btn-entrada" style="display: none;">🚪 Entrada</button>
-                <button id="resetCountersBtn" class="btn-reset">🔄 Reset</button>
-                <button id="menuBtn" class="btn-menu">☰</button>
-            </div>
-        </header>
+        <div class="header-simple">
+            <h1>⚡ DNI Scanner</h1>
+            <button id="menuBtn" class="btn-menu">☰</button>
+        </div>
 
         <!-- Menú Hamburguesa de Configuración -->
         <div class="menu-overlay" id="menuOverlay"></div>
@@ -192,6 +184,13 @@
                         <span class="contador-numero" id="capacidadActual">0</span>
                         <span class="contador-label">/ <span id="capacidadMaxima">∞</span></span>
                     </div>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="action-buttons">
+                    <button id="salidaBtn" class="btn-salida">🚪 Salida</button>
+                    <button id="entradaManualBtn" class="btn-entrada" style="display: none;">🚪 Entrada</button>
+                    <button id="resetCountersBtn" class="btn-reset">🔄 Reset</button>
                 </div>
             </div>
 
