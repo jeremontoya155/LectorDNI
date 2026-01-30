@@ -28,8 +28,8 @@
             </div>
 
             <div class="header-actions">
-                <button id="entradaManualBtn" class="btn-entrada" style="display: none;">🚪 Entrada</button>
                 <button id="salidaBtn" class="btn-salida">🚪 Salida</button>
+                <button id="entradaManualBtn" class="btn-entrada" style="display: none;">🚪 Entrada</button>
                 <button id="resetCountersBtn" class="btn-reset">🔄 Reset</button>
                 <button id="menuBtn" class="btn-menu">☰</button>
             </div>
@@ -158,28 +158,6 @@
                  
                 </div>
 
-                            <div class="contadores-wrapper">
-                <div class="contador contador-mayores">
-                    <span class="contador-numero" id="contadorMayores"><%= contadorMayores %></span>
-                    <span class="contador-label">Dentro</span>
-                </div>
-                <div class="contador contador-salidas">
-                    <span class="contador-numero" id="contadorSalidas"><%= contadorSalidas %></span>
-                    <span class="contador-label">Salidas</span>
-                </div>
-                <div class="contador contador-menores">
-                    <span class="contador-numero" id="contadorMenores"><%= contadorMenores %></span>
-                    <span class="contador-label">Menores</span>
-                </div>
-                <div class="contador contador-total">
-                    <span class="contador-numero" id="contadorTotal"><%= contador %></span>
-                    <span class="contador-label">Total</span>
-                </div>
-                <div class="contador contador-capacidad" id="contadorCapacidad" style="display: none;">
-                    <span class="contador-numero" id="capacidadActual">0</span>
-                    <span class="contador-label">/ <span id="capacidadMaxima">∞</span></span>
-                </div>
-            </div>
                 <div class="controls">
                     <button id="startBtn" class="btn btn-primary">
                         📷 Iniciar Cámara
@@ -191,6 +169,29 @@
 
                 <div class="instructions" id="cameraInstructions">
                     <p>📌 Posiciona el código de barras del DNI dentro del marco</p>
+                </div>
+
+                <div class="contadores-wrapper">
+                    <div class="contador contador-mayores">
+                        <span class="contador-numero" id="contadorMayores"><%= contadorMayores %></span>
+                        <span class="contador-label">Dentro</span>
+                    </div>
+                    <div class="contador contador-salidas">
+                        <span class="contador-numero" id="contadorSalidas"><%= contadorSalidas %></span>
+                        <span class="contador-label">Salidas</span>
+                    </div>
+                    <div class="contador contador-menores">
+                        <span class="contador-numero" id="contadorMenores"><%= contadorMenores %></span>
+                        <span class="contador-label">Menores</span>
+                    </div>
+                    <div class="contador contador-total">
+                        <span class="contador-numero" id="contadorTotal"><%= contador %></span>
+                        <span class="contador-label">Total</span>
+                    </div>
+                    <div class="contador contador-capacidad" id="contadorCapacidad" style="display: none;">
+                        <span class="contador-numero" id="capacidadActual">0</span>
+                        <span class="contador-label">/ <span id="capacidadMaxima">∞</span></span>
+                    </div>
                 </div>
             </div>
 

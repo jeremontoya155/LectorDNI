@@ -256,7 +256,7 @@ main {
 
 .camera-container {
     position: relative;
-    max-width: 700px;
+    max-width: 500px;
     margin: 0 auto 20px;
     background: #000;
     border-radius: 16px;
@@ -295,8 +295,8 @@ main {
 
 .scan-frame {
     position: relative;
-    width: 85%;
-    height: 160px;
+    width: 75%;
+    height: 120px;
     border: 1px solid rgba(0, 245, 255, 0.3);
     border-radius: 12px;
     background: rgba(0, 245, 255, 0.03);

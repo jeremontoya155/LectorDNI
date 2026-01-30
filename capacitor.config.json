@@ -1,0 +1,8 @@
+{
+  "appId": "com.dniscanner.app",
+  "appName": "DNI Scanner",
+  "webDir": "public",
+  "server": {
+    "url": "https://lectordni-production.up.railway.app"
+  }
+}
