@@ -19,6 +19,9 @@ let contadorMenores = 0;
 let contadorSalidas = 0;
 let historialEscaneos = [];
 
+// Set para trackear DNIs que están actualmente adentro
+let dnisAdentro = new Set();
+
 // Función para decodificar el PDF417 del DNI argentino
 function decodificarDNI(codigoBarras) {
     try {
@@ -119,12 +122,38 @@ app.post('/procesar-dni', (req, res) => {
     const edad = calcularEdad(datosPersona.fechaNacimiento);
     const esMayorDeEdad = edad >= 18;
     
+    // Verificar si el DNI ya está adentro (solo para mayores)
+    if (esMayorDeEdad && dnisAdentro.has(datosPersona.dni)) {
+        console.log('\n⚠️ DNI YA ESTÁ ADENTRO:', datosPersona.dni);
+        console.log(`👤 ${datosPersona.nombre} ${datosPersona.apellido}`);
+        console.log('=================================\n');
+        
+        return res.json({
+            success: true,
+            datos: {
+                nombreCompleto: `${datosPersona.nombre} ${datosPersona.apellido}`,
+                nombre: datosPersona.nombre,
+                apellido: datosPersona.apellido,
+                dni: datosPersona.dni,
+                edad,
+                esMayorDeEdad,
+                yaEstaAdentro: true
+            },
+            contador: contadorEscaneos,
+            contadorMayores: contadorMayores,
+            contadorMenores: contadorMenores,
+            contadorSalidas: contadorSalidas
+        });
+    }
+    
     contadorEscaneos++;
     
     // Incrementar contador correspondiente
     if (esMayorDeEdad) {
         // Mayores siempre se cuentan como entradas
         contadorMayores++;
+        // Agregar DNI al set de personas adentro
+        dnisAdentro.add(datosPersona.dni);
     } else {
         // Menores: SOLO se registran en su contador, NUNCA suman a entradas
         contadorMenores++;
@@ -263,6 +292,7 @@ app.post('/api/reiniciar-contadores', (req, res) => {
     contadorMenores = 0;
     contadorSalidas = 0;
     historialEscaneos = [];
+    dnisAdentro.clear(); // Limpiar también el registro de DNIs adentro
     
     console.log('\n🔄 CONTADORES REINICIADOS');
     console.log('=================================\n');

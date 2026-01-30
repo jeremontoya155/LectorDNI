@@ -543,6 +543,12 @@ function mostrarResultado(data) {
     // Detener la cámara para liberar recursos
     stopScanner();
 
+    // Verificar si el DNI ya estaba adentro
+    if (datos.yaEstaAdentro) {
+        mostrarAlertaDuplicado(datos);
+        return;
+    }
+
     // Actualizar contadores
     contadorTotal.textContent = contador;
     if (contadorMayores) contadorMayores.textContent = mayores;
@@ -597,6 +603,27 @@ function mostrarResultado(data) {
 
     // Iniciar temporizador automático - RECARGA LA PÁGINA con auto-start
     iniciarTemporizadorAutoScan();
+}
+
+// Mostrar alerta cuando el DNI ya está adentro
+function mostrarAlertaDuplicado(datos) {
+    // Vibrar si es posible (móvil)
+    if (navigator.vibrate) {
+        navigator.vibrate([200, 100, 200]);
+    }
+    
+    // Mostrar alerta grande y visible
+    alert(`⚠️ YA ESTÁ ADENTRO\n\n${datos.nombreCompleto}\nDNI: ${datos.dni}\n\nEsta persona ya ingresó anteriormente.`);
+    
+    console.log('⚠️ DNI DUPLICADO:', datos.dni, '-', datos.nombreCompleto);
+    
+    // Volver a escanear
+    if (modoActual === 'scanner') {
+        limpiarBufferBarcode();
+        window.location.href = '/?modo=scanner';
+    } else {
+        window.location.href = '/?autostart=1';
+    }
 }
 
 // Agregar al historial visual
