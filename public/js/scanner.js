@@ -721,6 +721,40 @@ function agregarAlHistorial(datos) {
     }
 }
 
+// Cargar y mostrar historial desde localStorage al inicio
+function cargarHistorialVisual() {
+    const historialList = document.getElementById('historialList');
+    if (!historialList) return;
+    
+    // Limpiar contenido actual
+    historialList.innerHTML = '';
+    
+    if (historialLocal.length === 0) {
+        historialList.innerHTML = '<p class="no-data">Sin escaneos aún</p>';
+        return;
+    }
+    
+    // Mostrar los últimos 10 en orden inverso (más reciente primero)
+    const ultimos10 = historialLocal.slice(-10).reverse();
+    
+    ultimos10.forEach(datos => {
+        const item = document.createElement('div');
+        item.className = `historial-item ${datos.esMayorDeEdad ? 'mayor' : 'menor'}`;
+        item.innerHTML = `
+            <div class="historial-info">
+                <strong>${datos.nombreCompleto || datos.nombre + ' ' + datos.apellido}</strong>
+                <span>DNI: ${datos.dni} • ${datos.edad} años</span>
+            </div>
+            <div class="historial-badge">
+                ${datos.esMayorDeEdad ? '✓ +18' : '⚠ -18'}
+            </div>
+        `;
+        historialList.appendChild(item);
+    });
+    
+    console.log('📋 Historial visual cargado:', ultimos10.length, 'elementos');
+}
+
 // Detener escáner
 function stopScanner() {
     scanning = false;
@@ -1066,6 +1100,9 @@ window.addEventListener('load', () => {
     
     // Actualizar UI con los contadores cargados
     actualizarContadoresUI();
+    
+    // Cargar y mostrar historial visual desde localStorage
+    cargarHistorialVisual();
     
     initScanner();
     console.log('🚀 Aplicación lista para escanear DNIs');
