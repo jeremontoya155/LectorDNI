@@ -274,7 +274,7 @@ header h1 {
 
 main {
     background: var(--bg-card);
-    padding: 20px;
+    padding: 12px;
     border-radius: 16px;
     border: 1px solid var(--border-color);
     width: 100%;
@@ -289,10 +289,10 @@ main {
 
 .camera-container {
     position: relative;
-    max-width: 600px;
-    margin: 0 auto 20px;
+    max-width: 220px;
+    margin: 0 auto 12px;
     background: #000;
-    border-radius: 16px;
+    border-radius: 12px;
     overflow: hidden;
     border: 2px solid var(--accent-cyan);
     box-shadow: var(--glow-cyan);
@@ -312,6 +312,8 @@ main {
 #video {
     width: 100%;
     display: block;
+    max-height: 180px;
+    object-fit: cover;
 }
 
 .scan-overlay {
@@ -328,10 +330,10 @@ main {
 
 .scan-frame {
     position: relative;
-    width: 75%;
-    height: 120px;
+    width: 55%;
+    height: 50px;
     border: 1px solid rgba(0, 245, 255, 0.3);
-    border-radius: 12px;
+    border-radius: 8px;
     background: rgba(0, 245, 255, 0.03);
 }
 
