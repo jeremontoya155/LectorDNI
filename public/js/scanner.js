@@ -327,7 +327,7 @@ function cambiarModo(modo) {
             barcodeInput.focus();
         }
         
-        actualizarEstadoDispositivo('scanner', 'Esperando escaneo del lector...');
+        actualizarEstadoDispositivo('scanner', 'Listo', 'ready');
     }
     
     console.log(`🔄 Modo cambiado a: ${modo}`);
@@ -414,8 +414,8 @@ function limpiarBufferBarcode() {
         barcodeTimeout = null;
     }
     if (barcodeInput) barcodeInput.value = '';
-    if (inputIndicator) inputIndicator.textContent = '⌨️ Esperando entrada...';
-    actualizarEstadoDispositivo('scanner', 'Esperando escaneo del lector...', 'ready');
+    if (inputIndicator) inputIndicator.textContent = '🔫 Listo';
+    actualizarEstadoDispositivo('scanner', 'Listo', 'ready');
 }
 
 // Inicializar el lector de códigos
@@ -617,12 +617,18 @@ function mostrarAlertaDuplicado(datos) {
     
     console.log('⚠️ DNI DUPLICADO:', datos.dni, '-', datos.nombreCompleto);
     
-    // Volver a escanear
-    if (modoActual === 'scanner') {
-        limpiarBufferBarcode();
-        window.location.href = '/?modo=scanner';
-    } else {
-        window.location.href = '/?autostart=1';
+    // Volver a escanear SIN recargar página
+    limpiarBufferBarcode();
+    
+    // Asegurar que el input tenga foco
+    if (modoActual === 'scanner' && barcodeInput) {
+        setTimeout(() => {
+            barcodeInput.value = '';
+            barcodeInput.focus();
+        }, 100);
+    } else if (modoActual === 'camera') {
+        scanning = true;
+        scanContinuously();
     }
 }
 
