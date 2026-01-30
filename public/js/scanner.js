@@ -875,6 +875,15 @@ if (resetCountersBtn) {
             }
             
             console.log('🔄 Contadores reiniciados');
+            
+            // Abrir el menú automáticamente después de reset
+            const menuSidebar = document.getElementById('menuSidebar');
+            const menuOverlay = document.getElementById('menuOverlay');
+            if (menuSidebar && menuOverlay) {
+                menuSidebar.classList.add('open');
+                menuOverlay.classList.add('open');
+                actualizarInfoCache();
+            }
         }
     });
 }
@@ -925,13 +934,21 @@ function inicializarMenu() {
     const menuSidebar = document.getElementById('menuSidebar');
     const menuClose = document.getElementById('menuClose');
     
-    // Abrir menú
-    if (menuBtn) {
-        menuBtn.addEventListener('click', () => {
+    // Función para abrir el menú con verificación de clave
+    function abrirMenu() {
+        const clave = prompt('🔒 Ingrese la clave de acceso:');
+        if (clave === '!!dniapp2020') {
             menuSidebar?.classList.add('open');
             menuOverlay?.classList.add('open');
             actualizarInfoCache();
-        });
+        } else if (clave !== null) {
+            alert('❌ Clave incorrecta');
+        }
+    }
+    
+    // Abrir menú
+    if (menuBtn) {
+        menuBtn.addEventListener('click', abrirMenu);
     }
     
     // Cerrar menú
@@ -984,6 +1001,26 @@ function inicializarMenu() {
     
     if (capacidadMaximaInput) {
         capacidadMaximaInput.value = config.capacidadMaxima;
+        capacidadMaximaInput.setAttribute('readonly', 'true');
+        
+        // Permitir editar solo con clic y verificación de clave
+        capacidadMaximaInput.addEventListener('click', () => {
+            const clave = prompt('🔒 Ingrese la clave para modificar la capacidad:');
+            if (clave === '!!dniapp2020') {
+                capacidadMaximaInput.removeAttribute('readonly');
+                capacidadMaximaInput.focus();
+                capacidadMaximaInput.select();
+            } else if (clave !== null) {
+                alert('❌ Clave incorrecta');
+            }
+        });
+        
+        // Volver a hacer readonly cuando pierde foco
+        capacidadMaximaInput.addEventListener('blur', () => {
+            setTimeout(() => {
+                capacidadMaximaInput.setAttribute('readonly', 'true');
+            }, 200);
+        });
     }
     
     if (guardarCapacidadBtn) {
@@ -997,6 +1034,7 @@ function inicializarMenu() {
                 const capacidadMaximaElem = document.getElementById('capacidadMaxima');
                 if (capacidadMaximaElem) capacidadMaximaElem.textContent = valor;
                 
+                capacidadMaximaInput.setAttribute('readonly', 'true');
                 alert(`✅ Capacidad máxima establecida en ${valor} personas`);
             }
         });
