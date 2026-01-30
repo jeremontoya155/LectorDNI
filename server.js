@@ -81,14 +81,15 @@ function calcularEdad(fechaNacimiento) {
     }
 }
 
-// Ruta principal
+// Ruta principal - NO comparte contadores entre usuarios
+// Cada cliente usa su propio localStorage
 app.get('/', (req, res) => {
     res.render('index', { 
-        contador: contadorEscaneos,
-        contadorMayores: contadorMayores,
-        contadorMenores: contadorMenores,
-        contadorSalidas: contadorSalidas,
-        historial: historialEscaneos.slice(-10).reverse() // Últimos 10 escaneos
+        contador: 0,
+        contadorMayores: 0,
+        contadorMenores: 0,
+        contadorSalidas: 0,
+        historial: [] // Cada cliente tiene su propio historial en localStorage
     });
 });
 
@@ -122,52 +123,17 @@ app.post('/procesar-dni', (req, res) => {
     const edad = calcularEdad(datosPersona.fechaNacimiento);
     const esMayorDeEdad = edad >= 18;
     
-    // Verificar si el DNI ya está adentro (solo para mayores)
-    if (esMayorDeEdad && dnisAdentro.has(datosPersona.dni)) {
-        console.log('\n⚠️ DNI YA ESTÁ ADENTRO:', datosPersona.dni);
-        console.log(`👤 ${datosPersona.nombre} ${datosPersona.apellido}`);
-        console.log('=================================\n');
-        
-        return res.json({
-            success: true,
-            datos: {
-                nombreCompleto: `${datosPersona.nombre} ${datosPersona.apellido}`,
-                nombre: datosPersona.nombre,
-                apellido: datosPersona.apellido,
-                dni: datosPersona.dni,
-                edad,
-                esMayorDeEdad,
-                yaEstaAdentro: true
-            },
-            contador: contadorEscaneos,
-            contadorMayores: contadorMayores,
-            contadorMenores: contadorMenores,
-            contadorSalidas: contadorSalidas
-        });
-    }
+    // La verificación de DNI duplicado se maneja en el cliente (localStorage)
     
-    contadorEscaneos++;
-    
-    // Incrementar contador correspondiente
-    if (esMayorDeEdad) {
-        // Mayores siempre se cuentan como entradas
-        contadorMayores++;
-        // Agregar DNI al set de personas adentro
-        dnisAdentro.add(datosPersona.dni);
-    } else {
-        // Menores: SOLO se registran en su contador, NUNCA suman a entradas
-        contadorMenores++;
-    }
+    // NO incrementar contadores del servidor
+    // Cada cliente maneja sus propios contadores en localStorage
     
     const registro = {
         timestamp: new Date().toLocaleString('es-AR'),
-        contador: contadorEscaneos,
         ...datosPersona,
         edad,
         esMayorDeEdad
     };
-    
-    historialEscaneos.push(registro);
     
     // LOG DETALLADO EN CONSOLA
     console.log('\n📋 DATOS EXTRAÍDOS DEL DNI:');
@@ -201,7 +167,7 @@ app.post('/procesar-dni', (req, res) => {
     console.log(`Total de escaneos: ${contadorEscaneos}`);
     console.log('=================================\n');
     
-    // Respuesta al cliente
+    // Respuesta al cliente - SIN contadores (se manejan en localStorage del cliente)
     res.json({
         success: true,
         datos: {
@@ -224,77 +190,33 @@ app.post('/procesar-dni', (req, res) => {
             fechaVencimiento: datosPersona.fechaVencimiento,
             idTramite: datosPersona.idTramite,
             esMayorDeEdad
-        },
-        contador: contadorEscaneos,
-        contadorMayores: contadorMayores,
-        contadorMenores: contadorMenores,
-        contadorSalidas: contadorSalidas
+        }
     });
 });
 
-// Endpoint para registrar salida
+// Endpoint para registrar salida - NO modifica contadores del servidor
 app.post('/api/registrar-salida', (req, res) => {
-    contadorSalidas++;
-    
-    // Restar 1 del contador de entradas (no puede ser negativo)
-    if (contadorMayores > 0) {
-        contadorMayores--;
-    }
-    
-    console.log('\n🚪 SALIDA REGISTRADA');
-    console.log(`Entradas actuales: ${contadorMayores}`);
-    console.log(`Total salidas: ${contadorSalidas}`);
+    console.log('\n🚪 SALIDA REGISTRADA (manejado en cliente)');
     console.log('=================================\n');
     
     res.json({
-        success: true,
-        contadorSalidas: contadorSalidas,
-        contadorMayores: contadorMayores
+        success: true
     });
 });
 
-// Endpoint para registrar entrada manual (sin DNI)
+// Endpoint para registrar entrada manual (sin DNI) - NO modifica contadores del servidor
 app.post('/api/registrar-entrada-manual', (req, res) => {
-    contadorEscaneos++;
-    contadorMayores++;
-    
-    const registro = {
-        timestamp: new Date().toLocaleString('es-AR'),
-        contador: contadorEscaneos,
-        tipo: 'ENTRADA_MANUAL',
-        nombre: 'Entrada',
-        apellido: 'Manual',
-        dni: 'SIN DNI',
-        edad: '-',
-        esMayorDeEdad: true
-    };
-    
-    historialEscaneos.push(registro);
-    
-    console.log('\n🟢 ENTRADA MANUAL REGISTRADA');
-    console.log(`Entradas actuales: ${contadorMayores}`);
-    console.log(`Total escaneos: ${contadorEscaneos}`);
+    console.log('\n🟢 ENTRADA MANUAL REGISTRADA (manejado en cliente)');
     console.log('=================================\n');
     
     res.json({
-        success: true,
-        contador: contadorEscaneos,
-        contadorMayores: contadorMayores,
-        contadorMenores: contadorMenores,
-        contadorSalidas: contadorSalidas
+        success: true
     });
 });
 
-// Endpoint para reiniciar contadores
+// Endpoint para reiniciar contadores - NO hace nada en servidor (se maneja en cliente)
 app.post('/api/reiniciar-contadores', (req, res) => {
-    contadorEscaneos = 0;
-    contadorMayores = 0;
-    contadorMenores = 0;
-    contadorSalidas = 0;
-    historialEscaneos = [];
-    dnisAdentro.clear(); // Limpiar también el registro de DNIs adentro
-    
-    console.log('\n🔄 CONTADORES REINICIADOS');
+    console.log('\n🔄 CONTADORES REINICIADOS (manejado en cliente)');
     console.log('=================================\n');
     
     res.json({
@@ -303,14 +225,10 @@ app.post('/api/reiniciar-contadores', (req, res) => {
     });
 });
 
-// Endpoint para obtener estadísticas
+// Endpoint para obtener estadísticas - Cada cliente usa su localStorage
 app.get('/api/estadisticas', (req, res) => {
     res.json({
-        totalEscaneos: contadorEscaneos,
-        contadorMayores: contadorMayores,
-        contadorMenores: contadorMenores,
-        contadorSalidas: contadorSalidas,
-        historial: historialEscaneos.slice(-20).reverse()
+        message: 'Estadísticas manejadas en localStorage del cliente'
     });
 });
 

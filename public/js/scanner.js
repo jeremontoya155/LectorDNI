@@ -20,6 +20,8 @@ const MIN_BARCODE_LENGTH = 20; // Longitud mínima del código de barras del DNI
 const CONFIG_KEY = 'dniScanner_config';
 const HISTORIAL_KEY = 'dniScanner_historial';
 const SESSION_KEY = 'dniScanner_session';
+const CONTADORES_KEY = 'dniScanner_contadores';
+const DNIS_ADENTRO_KEY = 'dniScanner_dnisAdentro';
 
 let config = {
     modoEscaneo: 'camera',
@@ -29,6 +31,55 @@ let config = {
 };
 
 let historialLocal = [];
+
+// Contadores locales (cada usuario tiene los suyos)
+let contadoresLocales = {
+    total: 0,
+    mayores: 0,
+    menores: 0,
+    salidas: 0
+};
+
+// Set de DNIs adentro (localStorage)
+let dnisAdentroLocal = new Set();
+
+// Cargar contadores desde localStorage
+function cargarContadores() {
+    try {
+        const savedContadores = localStorage.getItem(CONTADORES_KEY);
+        if (savedContadores) {
+            contadoresLocales = JSON.parse(savedContadores);
+        }
+        
+        const savedDnis = localStorage.getItem(DNIS_ADENTRO_KEY);
+        if (savedDnis) {
+            dnisAdentroLocal = new Set(JSON.parse(savedDnis));
+        }
+        
+        console.log('📊 Contadores cargados:', contadoresLocales);
+    } catch (error) {
+        console.error('Error cargando contadores:', error);
+    }
+}
+
+// Guardar contadores en localStorage
+function guardarContadores() {
+    try {
+        localStorage.setItem(CONTADORES_KEY, JSON.stringify(contadoresLocales));
+        localStorage.setItem(DNIS_ADENTRO_KEY, JSON.stringify([...dnisAdentroLocal]));
+    } catch (error) {
+        console.error('Error guardando contadores:', error);
+    }
+}
+
+// Actualizar contadores en la UI
+function actualizarContadoresUI() {
+    if (contadorTotal) contadorTotal.textContent = contadoresLocales.total;
+    if (contadorMayores) contadorMayores.textContent = contadoresLocales.mayores;
+    if (contadorMenores) contadorMenores.textContent = contadoresLocales.menores;
+    if (contadorSalidas) contadorSalidas.textContent = contadoresLocales.salidas;
+    verificarCapacidad();
+}
 
 // Cargar configuración desde localStorage
 function cargarConfiguracion() {
@@ -538,22 +589,32 @@ async function procesarCodigo(codigo) {
 
 // Mostrar resultado
 function mostrarResultado(data) {
-    const { datos, contador, contadorMayores: mayores, contadorMenores: menores, contadorSalidas: salidas } = data;
+    const { datos } = data;
 
     // Detener la cámara para liberar recursos
     stopScanner();
 
-    // Verificar si el DNI ya estaba adentro
-    if (datos.yaEstaAdentro) {
+    // Verificar si el DNI ya está adentro (localStorage local)
+    if (datos.esMayorDeEdad && dnisAdentroLocal.has(datos.dni)) {
         mostrarAlertaDuplicado(datos);
         return;
     }
 
-    // Actualizar contadores
-    contadorTotal.textContent = contador;
-    if (contadorMayores) contadorMayores.textContent = mayores;
-    if (contadorMenores) contadorMenores.textContent = menores;
-    if (contadorSalidas) contadorSalidas.textContent = salidas;
+    // Actualizar contadores LOCALES
+    contadoresLocales.total++;
+    
+    if (datos.esMayorDeEdad) {
+        contadoresLocales.mayores++;
+        dnisAdentroLocal.add(datos.dni);
+    } else {
+        contadoresLocales.menores++;
+    }
+    
+    // Guardar contadores en localStorage
+    guardarContadores();
+    
+    // Actualizar UI
+    actualizarContadoresUI();
 
     // Llenar datos personales
     document.getElementById('nombreCompleto').textContent = datos.nombreCompleto;
@@ -753,26 +814,33 @@ if (quickScanBtn) {
 // Reiniciar contadores
 if (resetCountersBtn) {
     resetCountersBtn.addEventListener('click', async () => {
-        if (confirm('¿Reiniciar todos los contadores?')) {
-            try {
-                const response = await fetch('/api/reiniciar-contadores', {
-                    method: 'POST'
-                });
-                const data = await response.json();
-                if (data.success) {
-                    // Actualizar contadores en pantalla
-                    contadorTotal.textContent = '0';
-                    if (contadorMayores) contadorMayores.textContent = '0';
-                    if (contadorMenores) contadorMenores.textContent = '0';
-                    if (contadorSalidas) contadorSalidas.textContent = '0';
-                    
-                    // Limpiar historial visual
-                    const historialList = document.getElementById('historialList');
-                    historialList.innerHTML = '<p class="no-data">Sin escaneos aún</p>';
-                }
-            } catch (error) {
-                console.error('Error al reiniciar contadores:', error);
+        if (confirm('🗑️ ¿Reiniciar todos los contadores? Esta acción no se puede deshacer.')) {
+            // Reiniciar contadores locales
+            contadoresLocales = {
+                total: 0,
+                mayores: 0,
+                menores: 0,
+                salidas: 0
+            };
+            
+            // Limpiar DNIs adentro
+            dnisAdentroLocal.clear();
+            
+            // Guardar y actualizar UI
+            guardarContadores();
+            actualizarContadoresUI();
+            
+            // Limpiar historial local
+            historialLocal = [];
+            guardarHistorial();
+            
+            // Limpiar historial visual
+            const historialList = document.getElementById('historialList');
+            if (historialList) {
+                historialList.innerHTML = '<p class="no-data">Sin escaneos aún</p>';
             }
+            
+            console.log('🔄 Contadores reiniciados');
         }
     });
 }
@@ -782,22 +850,24 @@ if (salidaBtn) {
     console.log('✅ Botón de salida encontrado, agregando listener');
     salidaBtn.addEventListener('click', async () => {
         console.log('🚪 Click en botón salida detectado');
-        try {
-            const response = await fetch('/api/registrar-salida', {
-                method: 'POST'
-            });
-            const data = await response.json();
-            console.log('📡 Respuesta del servidor:', data);
-            if (data.success) {
-                if (contadorSalidas) contadorSalidas.textContent = data.contadorSalidas;
-                if (contadorMayores) contadorMayores.textContent = data.contadorMayores;
-                // Feedback visual rápido
-                salidaBtn.style.transform = 'scale(0.95)';
-                setTimeout(() => salidaBtn.style.transform = '', 100);
-            }
-        } catch (error) {
-            console.error('Error al registrar salida:', error);
+        
+        // Incrementar contador de salidas
+        contadoresLocales.salidas++;
+        
+        // Restar de mayores si es posible
+        if (contadoresLocales.mayores > 0) {
+            contadoresLocales.mayores--;
         }
+        
+        // Guardar y actualizar UI
+        guardarContadores();
+        actualizarContadoresUI();
+        
+        // Feedback visual rápido
+        salidaBtn.style.transform = 'scale(0.95)';
+        setTimeout(() => salidaBtn.style.transform = '', 100);
+        
+        console.log('📊 Contadores actualizados:', contadoresLocales);
     });
 } else {
     console.error('❌ Botón de salida NO encontrado');
@@ -946,54 +1016,47 @@ function inicializarMenu() {
 
 // Registrar entrada manual (sin DNI)
 async function registrarEntradaManual() {
-    try {
-        const response = await fetch('/api/registrar-entrada-manual', {
-            method: 'POST'
-        });
-        const data = await response.json();
-        
-        if (data.success) {
-            // Actualizar contadores en pantalla
-            if (contadorTotal) contadorTotal.textContent = data.contador;
-            if (contadorMayores) contadorMayores.textContent = data.contadorMayores;
-            
-            // Guardar en historial local
-            agregarAHistorialLocal({
-                nombreCompleto: 'Entrada Manual',
-                nombre: 'Entrada',
-                apellido: 'Manual',
-                dni: 'SIN DNI',
-                edad: '-',
-                esMayorDeEdad: true,
-                tipo: 'MANUAL'
-            });
-            
-            // Verificar capacidad
-            verificarCapacidad();
-            
-            // Feedback visual
-            const entradaManualBtn = document.getElementById('entradaManualBtn');
-            if (entradaManualBtn) {
-                entradaManualBtn.style.transform = 'scale(0.95)';
-                entradaManualBtn.style.background = 'var(--accent-green)';
-                setTimeout(() => {
-                    entradaManualBtn.style.transform = '';
-                    entradaManualBtn.style.background = '';
-                }, 200);
-            }
-            
-            console.log('🟢 Entrada manual registrada');
-        }
-    } catch (error) {
-        console.error('Error al registrar entrada manual:', error);
-        alert('Error al registrar entrada');
+    // Incrementar contadores locales
+    contadoresLocales.total++;
+    contadoresLocales.mayores++;
+    
+    // Guardar y actualizar
+    guardarContadores();
+    actualizarContadoresUI();
+    
+    // Guardar en historial local
+    agregarAHistorialLocal({
+        nombreCompleto: 'Entrada Manual',
+        nombre: 'Entrada',
+        apellido: 'Manual',
+        dni: 'SIN DNI',
+        edad: '-',
+        esMayorDeEdad: true,
+        tipo: 'MANUAL'
+    });
+    
+    // Feedback visual
+    const entradaManualBtn = document.getElementById('entradaManualBtn');
+    if (entradaManualBtn) {
+        entradaManualBtn.style.transform = 'scale(0.95)';
+        entradaManualBtn.style.background = 'var(--accent-green)';
+        setTimeout(() => {
+            entradaManualBtn.style.transform = '';
+            entradaManualBtn.style.background = '';
+        }, 200);
     }
+    
+    console.log('🟢 Entrada manual registrada');
 }
 
 // Inicializar al cargar la página
 window.addEventListener('load', () => {
-    // Cargar configuración desde localStorage PRIMERO
+    // Cargar configuración y contadores desde localStorage PRIMERO
     cargarConfiguracion();
+    cargarContadores();
+    
+    // Actualizar UI con los contadores cargados
+    actualizarContadoresUI();
     
     initScanner();
     console.log('🚀 Aplicación lista para escanear DNIs');

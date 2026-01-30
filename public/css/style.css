@@ -1029,17 +1029,17 @@ main {
     justify-content: center;
     padding: 40px 20px;
     text-align: center;
-    background: var(--bg-card);
+    background: transparent;
     border-radius: 20px;
-    border: 2px dashed var(--border-color);
+    border: none;
     min-height: 200px;
     margin-bottom: 20px;
     transition: all 0.3s ease;
 }
 
 .scanner-mode-container:focus-within {
-    border-color: var(--accent-cyan);
-    box-shadow: 0 0 30px rgba(0, 245, 255, 0.1);
+    border-color: transparent;
+    box-shadow: none;
 }
 
 .scanner-icon {
@@ -1294,9 +1294,9 @@ main {
     align-items: center;
     justify-content: center;
     padding: 40px 20px;
-    background: var(--bg-card);
+    background: transparent;
     border-radius: 20px;
-    border: 2px dashed var(--border-color);
+    border: none;
     text-align: center;
     min-height: 150px;
 }
